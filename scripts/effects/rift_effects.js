@@ -1,5 +1,5 @@
 import Effect from './effect.js';
-import EffectDefinitions from './effect-definitions';
+//import EffectDefinitions from './effect-definitions';
 import Constants from '../constants.js';
 import Settings from '../settings.js';
 
