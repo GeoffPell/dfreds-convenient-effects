@@ -6,44 +6,47 @@ import Settings from '../settings.js';
 export default class RiftEffectDefinitions {
     get rift_conditions() {
         return [
+            this._embarrassed,
+            this._prone_till_next_turn,
+            this._DISLOCATION,
             this._ITEM_BROKE,
-      // this._OVEREXTENDED,
-      // this._fatigued,
-      // this._PULLED_MUSCLE,
-      // this._ANKLE_TWIST,
-      // this._KNEE_POP,
-      // this._WRONG_STRAP,
-      // this._STAGGERING_IN_PAIN,
-      // this._BLINDED_BY_YOUR_OWN_BLOOD,
+            this._OVEREXTENDED,
+            this._fatigued,
+            this._PULLED_MUSCLE,
+            this._ANKLE_TWIST,
+            this._KNEE_POP,
+            this._WRONG_STRAP,
+            this._STAGGERING_IN_PAIN,
+            this._BLINDED_BY_YOUR_OWN_BLOOD,
 
-      // //
-      // this._Drop_0_Bleeding_out,
-      // this._Drop_0_stable,
-      // this._Stunned_one_turn,
-      // this._Major_system_shock,
-      // this._System_shock,
+            //
+            this._Drop_0_Bleeding_out,
+            this._Drop_0_stable,
+            this._Stunned_one_turn,
+            this._Major_system_shock,
+            this._System_shock,
 
-      // //
-      // this._KNOCKDOWN,
-      // this._HAMSTRING,
-      // this._TURN_THE_TIDE,
-      // this._EYE_GOUGE,
-      // this._FORCEFUL_BLOW,
-      // this._STUNNING_BLOW,
-      // this._PARRY,
-      // this._GAPING_WOUND,
-      // this._PRESSURE_POINT,
-      // this._OPPORTUNITY,
-      // this._KNOCKOUT_BLOW,
-      // this._EVISCERATE,
-      // this._DECAPITATION,
-      // this._APPENDAGE_BLOW,
-      // this._WRIST_BLOW,
-      // this._MIGHTY_BLOW,
-      // this._HEAD_BLOW,
-      // this._KNEE_HIT,
-      // this._BODY_BLOW,
-      // this._SHOULDER_BLOW,
+            //
+            this._KNOCKDOWN,
+            this._HAMSTRING,
+            this._TURN_THE_TIDE,
+            this._EYE_GOUGE,
+            this._FORCEFUL_BLOW,
+            this._STUNNING_BLOW,
+            this._PARRY,
+            this._GAPING_WOUND,
+            this._PRESSURE_POINT,
+            this._OPPORTUNITY,
+            this._KNOCKOUT_BLOW,
+            this._EVISCERATE,
+            this._DECAPITATION,
+            this._APPENDAGE_BLOW,
+            this._WRIST_BLOW,
+            this._MIGHTY_BLOW,
+            this._HEAD_BLOW,
+            this._KNEE_HIT,
+            this._BODY_BLOW,
+            this._SHOULDER_BLOW,
 
         ]
     }
@@ -73,7 +76,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'KNOCKDOWN',
       description:
-        'KNOCKDOWN',
+        'In addition to standard critical hit damage, you knock the target prone.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -90,7 +93,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'HAMSTRING',
       description:
-        'HAMSTRING',
+        'In addition to standard critical hit damage, you hamstring the target. The target is slowed (save ends).',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -107,7 +110,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'TURN THE TIDE',
       description:
-        'TURN THE TIDE',
+        'In addition to standard critical hit damage to your target, you gain combat advantage against all enemies on the battlefield until the end of your next turn.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -124,7 +127,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'EYE GOUGE',
       description:
-        'EYE GOUGE',
+        'In addition to standard critical hit damage, your target is blinded until the end of its next turn.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -141,7 +144,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'FORCEFUL BLOW',
       description:
-        'FORCEFUL BLOW',
+        'In addition to standard critical hit damage, your target is dazed until the end of its next turn.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -158,7 +161,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'STUNNING BLOW',
       description:
-        'STUNNING BLOW',
+        'In addition to standard critical hit damage, your target is stunned until the end of its next turn.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -175,7 +178,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'PARRY',
       description:
-        'PARRY',
+        'In addition to standard critical hit damage to your target, you gain +2 to all your defenses against attacks from the target until the end of your next turn.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -192,7 +195,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'GAPING WOUND',
       description:
-        'GAPING WOUND',
+        'In addition to standard critical hit damage, the target takes ongoing 5 +1/2 your level damage (round up).',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -209,7 +212,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'PRESSURE POINT',
       description:
-        'PRESSURE POINT',
+        'In addition to standard critical hit damage, the target is Weakened (save ends).',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -226,7 +229,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'OPPORTUNITY',
       description:
-        'OPPORTUNITY',
+        'In addition to standard critical hit damage to your target, you may take an extra standard action this turn.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -243,7 +246,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'KNOCKOUT BLOW',
       description:
-        'KNOCKOUT BLOW',
+        'In addition to standard critical hit damage, you knock the target Unconcious (save or target taking damage ends).',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -260,7 +263,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'EVISCERATE',
       description:
-        'EVISCERATE',
+        'You do two standard critical hits to the target.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -277,7 +280,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'DECAPITATION',
       description:
-        'DECAPITATION',
+        'Your targets head is decapitated (slashing weapon), crushed (blunt weapon) or pierced (piercing weapon) or (if weapon was a spell) some effect to the head related to the type of attack that will likely leave target dead. If this action is not possible due to nature of the target, you do standard critical damage and gain an action point, instead.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -294,7 +297,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'APPENDAGE BLOW',
       description:
-        'APPENDAGE BLOW',
+        'In addition to standard critical damage, your target loses a finger (slashing weapon), breaks fingers (blunt weapon) or has arm muscle punctured (piercing weapon) or (if weapon was a spell) some effect to the fingers or arm related to the type of attack. 50% chance of either main or offhand. This hand or arm will suffer a -2 penalty on all checks for 4 weeks or until appropriate healing spell cast upon target. If this action is not possible due to the nature of the target, then in addition to standard critical damage, you gain an action point instead.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -311,7 +314,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'WRIST BLOW',
       description:
-        'WRIST BLOW',
+        'The targets hand is removed at the wrist (slashing weapon) or wrist broken (blunt weapon) or wrist pierced (piercing weapon) or (if weapon was a spell) some effect to wrist related to the type of damage. 50% chance of either main or offhand. Wrist is incapacitated in any case. If this action is not possible due to the nature of the target, then in addition to standard critical damage, you gain an action point instead.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -328,7 +331,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'MIGHTY BLOW',
       description:
-        'MIGHTY BLOW',
+        'You do three standard critical hits to the target.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -345,7 +348,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'HEAD BLOW',
       description:
-        'HEAD BLOW',
+        'In addition to standard critical hit, the target loses an ear (slashing weapon) or an eye (piercing weapon), or blow to the skull (blunt weapon) or (if weapon was a spell) some effect related to the type of attack. 50% of left or right side. Loss of ear or eye both result in permanently granting combat advantage to opponents approaching from that side. Blow to the head permanently reduces intelligence by 4 and knocks target Unconcious (save ends). If this action is impossible due to the nature of the target, then you do standard critical hit damage and gain an action point, instead.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -362,7 +365,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'KNEE HIT',
       description:
-        'KNEE HIT',
+        'In addition to standard critical damage, your targets leg is cut off at the knee (slashing weapon) and falls prone or knee is broken (blunt weapon) and movement reduced to 1/4 speed and target will have permanent limp (-2 speed) as after effect or knee is split (piercing weapon) and target falls and movement reduced to 1/2 speed or (if weapon is spell) some effect to the knee related to the type of attack. If this action is impossible due to the nature of the target, then you do standard critical damage and gain an action point, instead.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -379,7 +382,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'BODY BLOW',
       description:
-        'BODY BLOW',
+        'In addition to standard critical damage, your targets lung is slashed (slashing weapon) or pierced (piercing weapon) or ribs are broken (blunt weapon). All of these result in being stunned for 2 rounds and a -1 penalty to combat until healed with appropriate healing spell. 50% chance of right or left side. If this action is impossible due to the nature of the target, then you do standard critical damage and gain an action point, instead.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -396,7 +399,7 @@ get _KNOCKDOWN(){
     return new Effect({
       name: 'SHOULDER BLOW',
       description:
-        'SHOULDER BLOW',
+        'In addition to standard critical damage, your targets arm is cut off at the shoulder (slashing weapon) and target is stunned for 2 rounds or shoulder is broken (blunt weapon) and target is stunned for 2 rounds or shoulder is torn (piercing weapon) and target is stunned for 2 rounds or (if weapon was a spell) some effect to shoulder related to the type of attack. 50% chance of main or off hand. Broken or torn shoulders will result in a permanent -2 to all checks until healed with appropriate healing spell. If this action is impossible due to the nature of the target, you do standard critical hit damage and gain an action point, instead.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -420,7 +423,7 @@ get _Drop_0_Bleeding_out(){
     return new Effect({
       name: 'Drop 0 Bleeding out',
       description:
-        'Drop 0 Bleeding out',
+        'The creature drops to 0 hit points.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -437,7 +440,7 @@ get _Drop_0_Bleeding_out(){
     return new Effect({
       name: 'Drop 0 stable',
       description:
-        'Drop 0 stable',
+        'The creature drops to 0 hit points but is stable.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -454,7 +457,7 @@ get _Drop_0_Bleeding_out(){
     return new Effect({
       name: 'Stunned one turn',
       description:
-        'Stunned one turn',
+        'The creature is stunned until the end of its next turn.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       seconds: 20,
       turns: '1d4',
@@ -473,7 +476,7 @@ get _Drop_0_Bleeding_out(){
     return new Effect({
       name: 'Major system shock',
       description:
-        'Major system shock',
+        'The creature can’t take reactions and has disadvantage on attack rolls and ability checks until the end of its next turn.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -491,7 +494,7 @@ get _System_shock(){
     return new Effect({
       name: 'System shock',
       description:
-        'System shock',
+        'The creature can’t take reactions until the end of its next turn.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
@@ -505,6 +508,42 @@ get _System_shock(){
   
   
     /* Rifts Effects */
+    get _prone_till_next_turn(){
+      return new Effect({
+        name: 'prone_till_next_turn',
+        description:
+          'You fall Prone.',
+        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+        seconds: 20,
+        turns: '1d4',
+        changes: [
+          {
+            key: 'flags.midi-qol.disadvantage.attack.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+        ],
+      });
+    }
+
+    get _PULLED_MUSCLE(){
+      return new Effect({
+        name: 'PULLED MUSCLE',
+        description:
+          'You are weakened until end of your next turn.',
+        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+        seconds: 20,
+        turns: '1d4',
+        changes: [
+          {
+            key: 'flags.midi-qol.disadvantage.attack.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+        ],
+      });
+    }
+
     get _embarrassed(){
       return new Effect({
         name: 'Embarrassed',
@@ -526,26 +565,14 @@ get _System_shock(){
     
   
     get _OVEREXTENDED(){
-      return new Effect({
-        name: 'OVEREXTENDED',
-        description:
-          '_OVEREXTENDED',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        changes: [
-          {
-            key: 'flags.midi-qol.disadvantage.attack.all',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
-          },
-        ],
-      });
+      return _Stunned_one_turn
     }
   
     get _fatigued(){
       return new Effect({
         name: 'Fatigued',
         description:
-          'FATIGUED',
+          'You are dazed until end of your next turn',
         icon: 'modules/dfreds-convenient-effects/images/prone.svg',
         changes: [
           {
@@ -556,12 +583,13 @@ get _System_shock(){
         ],
       });
     }
-  
-    get _PULLED_MUSCLE(){
+
+
+    get _DISLOCATION(){
       return new Effect({
-        name: 'PULLED MUSCLE',
+        name: 'DISLOCATION',
         description:
-          'PULLED MUSCLE',
+          'A forceful pop in your shoulder is is heard as your arm goes limp. The arm you used to make the attack is incapacitated for 1d4 + 6 rounds',
         icon: 'modules/dfreds-convenient-effects/images/prone.svg',
         changes: [
           {
@@ -572,13 +600,14 @@ get _System_shock(){
         ],
       });
     }
+    
   
   
     get _ANKLE_TWIST(){
       return new Effect({
         name: 'ANKLE TWIST',
         description:
-          'ANKLE TWIST',
+          'You twist your ankle and have 1/2 movement speed and cannot charge for 1d4+1 rounds',
         icon: 'modules/dfreds-convenient-effects/images/prone.svg',
         changes: [
           {
@@ -594,7 +623,7 @@ get _System_shock(){
       return new Effect({
         name: 'KNEE POP',
         description:
-          'KNEE POP',
+          'Your knee hyperextends awkwardly. You have 1/4 movement speed and cannot charge for 1d4 + 6 rounds',
         icon: 'modules/dfreds-convenient-effects/images/prone.svg',
         changes: [
           {
@@ -610,7 +639,7 @@ get _System_shock(){
       return new Effect({
         name: 'WRONG STRAP',
         description:
-          'WRONG STRAP',
+          'In an embarrasing move, you cut loose part of your armor and receive a -4 penalty until armor is fixed. Fixing the armor will require 3 rounds of performing no other action',
         icon: 'modules/dfreds-convenient-effects/images/prone.svg',
         changes: [
           {
@@ -626,7 +655,7 @@ get _System_shock(){
       return new Effect({
         name: 'STAGGERING IN PAIN',
         description:
-          'STAGGERING IN PAIN',
+          'Your opponent parries your awkward attack that causes you to hit yourself in the groin. You have 1/2 movement and -4 to all actions for 1d6 + 4 rounds. If this action is impossible, your original target receives an action point',
         icon: 'modules/dfreds-convenient-effects/images/prone.svg',
         changes: [
           {
@@ -642,7 +671,7 @@ get _System_shock(){
       return new Effect({
         name: 'BLINDED BY YOUR OWN BLOOD',
         description:
-          'BLINDED BY YOUR OWN BLOOD',
+          'You hit yourself in the head causing a minor flesh wound (4 damage) and you are blinded by blood flowing into your eyes for 1d4 rounds.',
         icon: 'modules/dfreds-convenient-effects/images/prone.svg',
         changes: [
           {
