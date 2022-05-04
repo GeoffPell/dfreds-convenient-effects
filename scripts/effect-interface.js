@@ -175,6 +175,8 @@ export default class EffectInterface {
    * @returns {Promise} a promise that resolves when the GM socket function completes
    */
   async addEffect({ effectName, uuid, origin, overlay, metadata }) {
+
+
     let effect = this.findEffectByName(effectName);
 
     if (!effect) {

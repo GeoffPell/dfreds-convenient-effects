@@ -1,4 +1,5 @@
 import Effect from './effect.js';
+import EffectDefinitions from './effect-definitions';
 import Constants from '../constants.js';
 import Settings from '../settings.js';
 
@@ -51,17 +52,46 @@ export default class RiftEffectDefinitions {
         ]
     }
 
-    get _ITEM_BROKE(){
+
+
+
+    // DONE =============
+
+
+    /* Rifts critical effects */
+    //   KNOCKDOWN
+
+    //   HAMSTRING
+    get _HAMSTRING(){
       return new Effect({
-        name: 'ITEM BROKE',
+        name: 'HAMSTRING',
         description:
-          'ITEM BROKE',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        seconds: 20,
-        turns: '1d4',
+          'In addition to standard critical hit damage, you hamstring the target. The target is slowed for 1 hour.',
+        icon: 'modules/dfreds-convenient-effects/images/grappled.svg',
+        seconds: 3600,
         changes: [
           {
-            key: 'flags.midi-qol.disadvantage.attack.all',
+            key: 'data.attributes.movement.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '*0.5',
+            priority: 5,
+          },
+        ],
+      });
+    }
+
+
+    //   TURN THE TIDE
+    get _TURN_THE_TIDE(){
+      return new Effect({
+        name: 'TURN THE TIDE',
+        description:
+          'In addition to standard critical hit damage to your target, you gain combat advantage against all enemies on the battlefield until the end of your next turn.',
+        icon: 'modules/dfreds-convenient-effects/images/magic-palm.svg',
+        turns: 1,
+        changes: [
+          {
+            key: 'flags.midi-qol.advantage.attack.all',
             mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
             value: '1',
           },
@@ -70,126 +100,100 @@ export default class RiftEffectDefinitions {
     }
 
 
-/* Rifts critical effects */
-//   KNOCKDOWN
-get _KNOCKDOWN(){
-    return new Effect({
-      name: 'KNOCKDOWN',
-      description:
-        'In addition to standard critical hit damage, you knock the target prone.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      changes: [
-        {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
-    });
-  }
-  
-  //   HAMSTRING
-  get _HAMSTRING(){
-    return new Effect({
-      name: 'HAMSTRING',
-      description:
-        'In addition to standard critical hit damage, you hamstring the target. The target is slowed (save ends).',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      changes: [
-        {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
-    });
-  }
-  
-  //   TURN THE TIDE
-  get _TURN_THE_TIDE(){
-    return new Effect({
-      name: 'TURN THE TIDE',
-      description:
-        'In addition to standard critical hit damage to your target, you gain combat advantage against all enemies on the battlefield until the end of your next turn.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      changes: [
-        {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
-    });
-  }
-  
-  //   EYE GOUGE
+    //   EYE GOUGE
   get _EYE_GOUGE(){
     return new Effect({
       name: 'EYE GOUGE',
       description:
         'In addition to standard critical hit damage, your target is blinded until the end of its next turn.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      changes: [
-        {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
+        icon: 'modules/dfreds-convenient-effects/images/blinded.svg',
+        turns: 1,
+        changes: [
+          {
+            key: 'flags.midi-qol.disadvantage.attack.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.grants.advantage.attack.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+        ],
     });
   }
-  
+
   //   FORCEFUL BLOW
   get _FORCEFUL_BLOW(){
     return new Effect({
       name: 'FORCEFUL BLOW',
       description:
-        'In addition to standard critical hit damage, your target is dazed until the end of its next turn.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+        'In addition to standard critical hit damage, your target is dazed until the end of its next turn. (Cannot cast spells, disadvantage attacks and ability checks).',
+      icon: 'modules/dfreds-convenient-effects/images/frightened.svg',
+      turns: 1,
       changes: [
         {
           key: 'flags.midi-qol.disadvantage.attack.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
+        {
+          key: 'flags.midi-qol.disadvantage.ability.check.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
       ],
     });
   }
-  
+
+
   //   STUNNING BLOW
   get _STUNNING_BLOW(){
     return new Effect({
       name: 'STUNNING BLOW',
       description:
         'In addition to standard critical hit damage, your target is stunned until the end of its next turn.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      icon: 'modules/dfreds-convenient-effects/images/stunned.svg',
+      turns: 1,
       changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
+          key: 'flags.midi-qol.fail.ability.save.dex',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.fail.ability.save.str',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.advantage.attack.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
       ],
     });
   }
-  
+
+
   //   PARRY
   get _PARRY(){
     return new Effect({
       name: 'PARRY',
       description:
-        'In addition to standard critical hit damage to your target, you gain +2 to all your defenses against attacks from the target until the end of your next turn.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+        'In addition to standard critical hit damage to your target, you gain +2 to all your defenses against attacks until the end of your next turn.',
+      icon: 'modules/dfreds-convenient-effects/images/brick-wall.svg',
       changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
+          key: 'data.attributes.ac.bonus',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '+2',
         },
       ],
     });
   }
-  
+
+
   //   GAPING WOUND
   get _GAPING_WOUND(){
     return new Effect({
@@ -199,77 +203,90 @@ get _KNOCKDOWN(){
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
+          key: 'flags.midi-qol.OverTime.regenerate',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+          value:
+            'label=Bleeding,turn=start,damageRoll=-1d6,damageType=bleeding,condition=@attributes.hp.value > 0',
         },
       ],
     });
   }
-  
+
+
   //   PRESSURE POINT
   get _PRESSURE_POINT(){
+    var reduction = '-1d6'
+
     return new Effect({
       name: 'PRESSURE POINT',
       description:
         'In addition to standard critical hit damage, the target is Weakened (save ends).',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      
       changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
+          key: 'data.bonuses.mwak.damage',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
+          value: reduction,
+        },
+        {
+          key: 'data.bonuses.rwak.damage',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: reduction,
+        },
+        {
+          key: 'data.bonuses.rsak.damage',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: reduction,
+        },        
+        {
+          key: 'data.bonuses.msak.damage',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: reduction,
         },
       ],
     });
   }
-  
-  //   OPPORTUNITY
-  get _OPPORTUNITY(){
-    return new Effect({
-      name: 'OPPORTUNITY',
-      description:
-        'In addition to standard critical hit damage to your target, you may take an extra standard action this turn.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      changes: [
-        {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
-    });
-  }
-  
+
+
   //   KNOCKOUT BLOW
   get _KNOCKOUT_BLOW(){
     return new Effect({
       name: 'KNOCKOUT BLOW',
       description:
         'In addition to standard critical hit damage, you knock the target Unconcious (save or target taking damage ends).',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      icon: 'icons/svg/unconscious.svg',
       changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
+          key: 'flags.midi-qol.fail.ability.save.dex',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
-      ],
-    });
-  }
-  
-  //   EVISCERATE
-  get _EVISCERATE(){
-    return new Effect({
-      name: 'EVISCERATE',
-      description:
-        'You do two standard critical hits to the target.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
+          key: 'flags.midi-qol.fail.ability.save.str',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.advantage.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.critical.mwak',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.critical.msak',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'data.attributes.movement.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '0',
+          priority: 5,
         },
       ],
     });
@@ -281,16 +298,12 @@ get _KNOCKDOWN(){
       name: 'DECAPITATION',
       description:
         'Your targets head is decapitated (slashing weapon), crushed (blunt weapon) or pierced (piercing weapon) or (if weapon was a spell) some effect to the head related to the type of attack that will likely leave target dead. If this action is not possible due to nature of the target, you do standard critical damage and gain an action point, instead.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      changes: [
-        {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
+      icon: 'icons/svg/skull.svg',
     });
   }
+
+
+  
   
   //   APPENDAGE BLOW
   get _APPENDAGE_BLOW(){
@@ -301,9 +314,29 @@ get _KNOCKDOWN(){
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
+          key: 'data.bonuses.abilities.check',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-1d2',
+        },
+        {
+          key: 'data.bonuses.msak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-1d2',
+        },
+        {
+          key: 'data.bonuses.mwak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-1d2',
+        },
+        {
+          key: 'data.bonuses.rsak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-1d2',
+        },
+        {
+          key: 'data.bonuses.rwak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-1d2',
         },
       ],
     });
@@ -318,47 +351,60 @@ get _KNOCKDOWN(){
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
+          key: 'data.bonuses.abilities.check',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-1d4',
         },
-      ],
-    });
-  }
-  
-  //   MIGHTY BLOW
-  get _MIGHTY_BLOW(){
-    return new Effect({
-      name: 'MIGHTY BLOW',
-      description:
-        'You do three standard critical hits to the target.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
+          key: 'data.bonuses.msak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-1d4',
+        },
+        {
+          key: 'data.bonuses.mwak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-1d4',
+        },
+        {
+          key: 'data.bonuses.rsak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-1d4',
+        },
+        {
+          key: 'data.bonuses.rwak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-1d4',
         },
       ],
     });
   }
+
+  
   
   //   HEAD BLOW
   get _HEAD_BLOW(){
     return new Effect({
       name: 'HEAD BLOW',
       description:
-        'In addition to standard critical hit, the target loses an ear (slashing weapon) or an eye (piercing weapon), or blow to the skull (blunt weapon) or (if weapon was a spell) some effect related to the type of attack. 50% of left or right side. Loss of ear or eye both result in permanently granting combat advantage to opponents approaching from that side. Blow to the head permanently reduces intelligence by 4 and knocks target Unconcious (save ends). If this action is impossible due to the nature of the target, then you do standard critical hit damage and gain an action point, instead.',
+        'In addition to standard critical hit, the target loses an ear (slashing weapon) or an eye (piercing weapon), or blow to the skull (blunt weapon) or (if weapon was a spell) some effect related to the type of attack. 50% of left or right side. Loss of ear or eye both result in permanently granting combat advantage to opponents approaching from that side. Blow to the head permanently reduces int save and checks by 4. If this action is impossible due to the nature of the target, then you do standard critical hit damage and gain an action point, instead.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
+          key: 'data.abilities.int.bonuses.save',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '+4',
+        },
+        {
+          key: 'data.abilities.int.bonuses.check',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '+4',
         },
       ],
     });
   }
+
+  
+  
   
   //   KNEE HIT
   get _KNEE_HIT(){
@@ -369,13 +415,15 @@ get _KNOCKDOWN(){
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
       changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
+          key: 'data.attributes.movement.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
+          value: '*0.5',
+          priority: 5,
         },
       ],
     });
   }
+
   
   //   BODY BLOW
   get _BODY_BLOW(){
@@ -383,16 +431,48 @@ get _KNOCKDOWN(){
       name: 'BODY BLOW',
       description:
         'In addition to standard critical damage, your targets lung is slashed (slashing weapon) or pierced (piercing weapon) or ribs are broken (blunt weapon). All of these result in being stunned for 2 rounds and a -1 penalty to combat until healed with appropriate healing spell. 50% chance of right or left side. If this action is impossible due to the nature of the target, then you do standard critical damage and gain an action point, instead.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      icon: 'modules/dfreds-convenient-effects/images/stunned.svg',
+      turns: 2,
       changes: [
-        {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
+          {
+            key: 'flags.midi-qol.fail.ability.save.dex',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.fail.ability.save.str',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.grants.advantage.attack.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'data.bonuses.msak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: 1,
+          },
+          {
+            key: 'data.bonuses.mwak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: 1,
+          },
+          {
+            key: 'data.bonuses.rsak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: 1,
+          },
+          {
+            key: 'data.bonuses.rwak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: 1,
+          },
+        ],
     });
   }
+
   
   //   SHOULDER BLOW
   get _SHOULDER_BLOW(){
@@ -401,36 +481,93 @@ get _KNOCKDOWN(){
       description:
         'In addition to standard critical damage, your targets arm is cut off at the shoulder (slashing weapon) and target is stunned for 2 rounds or shoulder is broken (blunt weapon) and target is stunned for 2 rounds or shoulder is torn (piercing weapon) and target is stunned for 2 rounds or (if weapon was a spell) some effect to shoulder related to the type of attack. 50% chance of main or off hand. Broken or torn shoulders will result in a permanent -2 to all checks until healed with appropriate healing spell. If this action is impossible due to the nature of the target, you do standard critical hit damage and gain an action point, instead.',
       icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      turns: 2,
       changes: [
-        {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
+          {
+            key: 'flags.midi-qol.fail.ability.save.dex',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.fail.ability.save.str',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.grants.advantage.attack.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'data.bonuses.msak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: 2,
+          },
+          {
+            key: 'data.bonuses.mwak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: 2,
+          },
+          {
+            key: 'data.bonuses.rsak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: 2,
+          },
+          {
+            key: 'data.bonuses.rwak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: 2,
+          },
+        ],
     });
   }
-  
+
+
+
   
   
 
-  
-
-/* Rifts Massive damage */
-//   // --------------
-//   Drop 0 Bleeding out
-get _Drop_0_Bleeding_out(){
+  /* Rifts Massive damage */
+  //   // --------------
+  //   Drop 0 Bleeding out
+  get _Drop_0_Bleeding_out(){
     return new Effect({
       name: 'Drop 0 Bleeding out',
       description:
         'The creature drops to 0 hit points.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      changes: [
-        {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
+        icon: 'icons/svg/unconscious.svg',
+        changes: [
+          {
+            key: 'flags.midi-qol.fail.ability.save.dex',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.fail.ability.save.str',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.grants.advantage.attack.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.grants.critical.mwak',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.grants.critical.msak',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'data.attributes.movement.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '0',
+            priority: 5,
+          },
       ],
     });
   }
@@ -441,13 +578,39 @@ get _Drop_0_Bleeding_out(){
       name: 'Drop 0 stable',
       description:
         'The creature drops to 0 hit points but is stable.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      changes: [
-        {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
+        icon: 'icons/svg/unconscious.svg',
+        changes: [
+          {
+            key: 'flags.midi-qol.fail.ability.save.dex',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.fail.ability.save.str',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.grants.advantage.attack.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.grants.critical.mwak',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.grants.critical.msak',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'data.attributes.movement.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '0',
+            priority: 5,
+          },
       ],
     });
   }
@@ -458,12 +621,21 @@ get _Drop_0_Bleeding_out(){
       name: 'Stunned one turn',
       description:
         'The creature is stunned until the end of its next turn.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      seconds: 20,
-      turns: '1d4',
+      icon: 'modules/dfreds-convenient-effects/images/broken-wall.svg',
+      turns: 1,
       changes: [
         {
-          key: 'flags.midi-qol.disadvantage.attack.all',
+          key: 'flags.midi-qol.fail.ability.save.dex',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.fail.ability.save.str',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.advantage.attack.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
@@ -477,10 +649,16 @@ get _Drop_0_Bleeding_out(){
       name: 'Major system shock',
       description:
         'The creature can’t take reactions and has disadvantage on attack rolls and ability checks until the end of its next turn.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      icon: 'modules/dfreds-convenient-effects/images/broken-wall.svg',
+      turns: 1,
       changes: [
         {
           key: 'flags.midi-qol.disadvantage.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.disadvantage.ability.check.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
@@ -495,17 +673,22 @@ get _System_shock(){
       name: 'System shock',
       description:
         'The creature can’t take reactions until the end of its next turn.',
-      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-      changes: [
-        {
-          key: 'flags.midi-qol.disadvantage.attack.all',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
+      icon: 'modules/dfreds-convenient-effects/images/broken-wall.svg',
+      turns: 1,
     });
   }
   
+  
+
+    // NOT DONE =============
+
+
+  
+
+  
+  
+  
+
   
     /* Rifts Effects */
     get _prone_till_next_turn(){
@@ -565,8 +748,33 @@ get _System_shock(){
     
   
     get _OVEREXTENDED(){
-      return _Stunned_one_turn
+      return new Effect({
+        name: 'Stunned one turn',
+        description:
+          'The creature is stunned until the end of its next turn.',
+        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+        seconds: 20,
+        turns: '1d4',
+        changes: [
+          {
+            key: 'flags.midi-qol.fail.ability.save.dex',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.fail.ability.save.str',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.grants.advantage.attack.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+        ],
+      });
     }
+    
   
     get _fatigued(){
       return new Effect({
