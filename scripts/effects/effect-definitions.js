@@ -1,14 +1,18 @@
 import Effect from './effect.js';
 import Constants from '../constants.js';
 import Settings from '../settings.js';
+import CustomEffectsHandler from './custom-effects-handler.js';
+import RiftEffectDefinitions from "./rift_effects.js";
+
 
 /**
  * Defines all of the effect definitions
  */
 export default class EffectDefinitions {
   constructor() {
+    this._customEffectsHandler = new CustomEffectsHandler();
     this._settings = new Settings();
-    this._customEffects = [];
+    this._riftThings = new RiftEffectDefinitions();
   }
 
   /**
@@ -24,8 +28,10 @@ export default class EffectDefinitions {
       ...this.classFeatures,
       ...this.equipment,
       ...this.other,
+      ...this._riftThings.rift_conditions,
     ];
   }
+
 
   /**
    * Get all the condition effects
@@ -55,8 +61,11 @@ export default class EffectDefinitions {
       this._restrained,
       this._stunned,
       this._unconscious,
+      this._wounded,
+
     ];
   }
+
 
   /**
    * Get all the custom effects
@@ -64,15 +73,7 @@ export default class EffectDefinitions {
    * @returns {Effect[]} all the custom effects
    */
   get customEffects() {
-    return this._customEffects;
-  }
-
-  /**
-   * Set the custom effects
-   * @param {Effect[]} effects - the custom effects to set
-   */
-  set customEffects(effects) {
-    this._customEffects = effects;
+    return this._customEffectsHandler.getCustomEffects();
   }
 
   /**
@@ -82,13 +83,23 @@ export default class EffectDefinitions {
    */
   get spells() {
     return [
+      this._acidArrow, // TODO figure out higher level casting
       this._aid, // TODO figure out higher level casting
+      this._alterSelf,
+      this._antilifeShell,
+      this._arcaneHand,
       this._bane,
       this._barkskin,
       this._beaconOfHope,
+      this._blackTentacles,
       this._bless,
+      this._blindnessDeafness,
+      this._blindnessDeafnessBlindness,
+      this._blindnessDeafnessDeafness,
       this._blur,
+      this._charmPerson,
       this._command,
+      this._comprehendLanguages,
 
       this._contagion,
       this._contagionBlindingSickness,
@@ -99,6 +110,9 @@ export default class EffectDefinitions {
       this._contagionSlimyDoom,
 
       this._darkvision,
+      this._disguiseSelf,
+      this._divineFavor,
+      this._divineWord,
 
       this._enlargeReduce,
       this._enlargeReduceEnlarge,
@@ -113,14 +127,19 @@ export default class EffectDefinitions {
       this._enhanceAbilityOwlsWisdom,
 
       this._faerieFire,
-      this._feeblemind,
       this._falseLife, // TODO figure out higher level casting
+      this._featherFall,
+      this._feeblemind,
 
       this._fireShield,
       this._fireShieldColdResistance,
       this._fireShieldFireResistance,
 
+      this._findThePath,
       this._fly,
+      this._foresight,
+      this._freedomOfMovement,
+      this._globeOfInvulnerability,
       this._greaterInvisibility,
       this._guidance,
       this._guidingBolt,
@@ -128,9 +147,13 @@ export default class EffectDefinitions {
       this._heroesFeast,
       this._heroism,
       this._hideousLaughter,
+      this._holdMonster,
+      this._holdPerson,
       this._holyAura,
       this._huntersMark,
       this._invisibility,
+      this._irresistibleDance,
+      this._jump,
       this._light,
       this._longstrider,
       this._mageArmor,
@@ -146,17 +169,28 @@ export default class EffectDefinitions {
       this._protectionFromEnergyThunder,
       this._protectionFromPoison,
 
+      this._protectionFromEvilAndGood,
       this._rayOfFrost,
+      this._regenerate,
       this._resilientSphere,
       this._resistance,
       this._shield,
       this._shieldOfFaith,
       this._slow,
+      this._speakWithAnimals,
+      this._speakWithDead,
+      this._speakWithPlants,
       this._spiderClimb,
+      this._spiritGuardians,
       this._spiritualWeapon,
       this._stoneskin,
+      this._suggestion,
+      this._telekinesis,
       this._trueStrike,
       this._viciousMockery,
+      this._wardingBond,
+      this._waterBreathing,
+      this._waterWalk,
     ];
   }
 
@@ -173,7 +207,10 @@ export default class EffectDefinitions {
       this._bardicInspirationD10,
       this._bardicInspirationD12,
       this._channelDivinitySacredWeapon,
+      this._channelDivinityTurnTheUnholy,
       this._channelDivinityTurnUndead,
+      this._kiEmptyBody,
+      this._kiPatientDefense,
       this._rage,
       this._recklessAttack,
     ];
@@ -182,7 +219,7 @@ export default class EffectDefinitions {
   /**
    * Get all the equipment effects
    *
-   * @returns {Effect[]} all the ATL effects
+   * @returns {Effect[]} all the equipment effects
    */
   get equipment() {
     return [
@@ -201,6 +238,7 @@ export default class EffectDefinitions {
    */
   get other() {
     return [
+      this._bonusAction,
       this._coverHalf,
       this._coverThreeQuarters,
       this._encumbered,
@@ -209,12 +247,18 @@ export default class EffectDefinitions {
       this._flanking,
       this._greatWeaponMaster,
       this._heavilyEncumbered,
+      this._inspiration,
       this._rangedDisadvantage,
       this._reaction,
       this._ready,
       this._sharpshooter,
     ];
   }
+
+
+
+
+
 
   /* Condition Effects */
   get _blinded() {
@@ -281,6 +325,11 @@ export default class EffectDefinitions {
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
+        {
+          key: 'flags.dnd5e.initiativeDisadv',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
       ],
     });
   }
@@ -293,6 +342,11 @@ export default class EffectDefinitions {
       changes: [
         {
           key: 'flags.midi-qol.disadvantage.ability.check.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.dnd5e.initiativeDisadv',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
@@ -315,6 +369,11 @@ export default class EffectDefinitions {
       changes: [
         {
           key: 'flags.midi-qol.disadvantage.ability.check.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.dnd5e.initiativeDisadv',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
@@ -347,6 +406,11 @@ export default class EffectDefinitions {
       changes: [
         {
           key: 'flags.midi-qol.disadvantage.ability.check.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.dnd5e.initiativeDisadv',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
@@ -385,6 +449,11 @@ export default class EffectDefinitions {
       changes: [
         {
           key: 'flags.midi-qol.disadvantage.ability.check.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.dnd5e.initiativeDisadv',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
@@ -573,6 +642,7 @@ export default class EffectDefinitions {
     });
   }
 
+
   get _prone() {
     return new Effect({
       name: 'Prone',
@@ -604,6 +674,12 @@ export default class EffectDefinitions {
           key: 'flags.midi-qol.disadvantage.attack.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
+        },
+        {
+          key: 'data.attributes.movement.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '*0.5',
+          priority: 5,
         },
       ],
     });
@@ -677,7 +753,31 @@ export default class EffectDefinitions {
     });
   }
 
+  get _wounded() {
+    return new Effect({
+      name: 'Wounded',
+      description: 'No active effects',
+      icon: 'modules/dfreds-convenient-effects/images/wounded.svg',
+    });
+  }
+
   /* Spell Effects */
+  get _acidArrow() {
+    return new Effect({
+      name: 'Acid Arrow',
+      description: 'Causes 2d4 acid damage at the end of next turn',
+      icon: 'systems/dnd5e/icons/spells/needles-acid-2.jpg',
+      changes: [
+        {
+          key: 'flags.midi-qol.OverTime',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value:
+            'turn=end,removeCondition=true,damageRoll=2d4,damageType=acid,label=Acid Arrow',
+        },
+      ],
+    });
+  }
+
   get _aid() {
     return new Effect({
       name: 'Aid',
@@ -687,6 +787,33 @@ export default class EffectDefinitions {
       flags: {
         requiresActorUpdate: true,
       },
+    });
+  }
+
+  get _alterSelf() {
+    return new Effect({
+      name: 'Alter Self',
+      description: 'No active effects and lasts for 1 hour',
+      icon: 'icons/magic/control/debuff-energy-hold-green.webp',
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+    });
+  }
+
+  get _antilifeShell() {
+    return new Effect({
+      name: 'Antilife Shell',
+      description: 'No active effects and lasts for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/protect-jade-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+    });
+  }
+
+  get _arcaneHand() {
+    return new Effect({
+      name: 'Arcane Hand',
+      description: 'No active effects and lasts for 1 minute',
+      icon: 'systems/dnd5e/icons/spells/fireball-eerie-3.jpg',
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
     });
   }
 
@@ -767,6 +894,16 @@ export default class EffectDefinitions {
     });
   }
 
+  get _blackTentacles() {
+    return new Effect({
+      name: 'Black Tentacles',
+      description: 'Apply the effects of the restrained condition for 1 minute',
+      icon: 'systems/dnd5e/icons/spells/vines-eerie-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
+      changes: [...this._restrained.changes],
+    });
+  }
+
   get _bless() {
     return new Effect({
       name: 'Bless',
@@ -810,6 +947,41 @@ export default class EffectDefinitions {
     });
   }
 
+  get _blindnessDeafness() {
+    return new Effect({
+      name: 'Blindness/Deafness',
+      description: 'Choose between blindness or deafness',
+      icon: 'systems/dnd5e/icons/spells/evil-eye-red-2.jpg',
+      nestedEffects: [
+        this._blindnessDeafnessBlindness,
+        this._blindnessDeafnessDeafness,
+      ],
+    });
+  }
+
+  get _blindnessDeafnessBlindness() {
+    return new Effect({
+      name: 'Blindness',
+      description:
+        'Disadvantage on attack rolls while granting advantage to all who attack for 1 minute',
+      icon: 'systems/dnd5e/icons/spells/evil-eye-red-2.jpg',
+      isViewable: this._settings.showNestedEffects,
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
+      changes: [...this._blinded.changes],
+    });
+  }
+
+  get _blindnessDeafnessDeafness() {
+    return new Effect({
+      name: 'Deafness',
+      description: 'No active effects and lasts for 1 minute',
+      icon: 'systems/dnd5e/icons/spells/evil-eye-red-2.jpg',
+      isViewable: this._settings.showNestedEffects,
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
+      changes: [...this._deafened.changes],
+    });
+  }
+
   get _blur() {
     return new Effect({
       name: 'Blur',
@@ -833,17 +1005,39 @@ export default class EffectDefinitions {
     });
   }
 
+  get _charmPerson() {
+    return new Effect({
+      name: 'Charm Person',
+      description: 'No active effects and lasts for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/explosion-magenta-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      changes: [...this._charmed.changes],
+    });
+  }
+
   get _command() {
     return new Effect({
       name: 'Command',
-      description: 'No active effects and lasts for 1 round',
+      description: 'No active effects and lasts until the end of next turn',
       icon: 'systems/dnd5e/icons/spells/explosion-magenta-1.jpg',
-      seconds: Constants.SECONDS.IN_ONE_ROUND,
-      flags: {
-        dae: {
-          specialDuration: ['turnEnd'],
+      seconds: CONFIG.time.roundTime,
+      turns: 1,
+    });
+  }
+
+  get _comprehendLanguages() {
+    return new Effect({
+      name: 'Comprehend Languages',
+      description: 'Adds all languages for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/runes-royal-1.jpg',
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      changes: [
+        {
+          key: 'data.traits.languages.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
         },
-      },
+      ],
     });
   }
 
@@ -870,7 +1064,7 @@ export default class EffectDefinitions {
       description:
         'Disadvantage on wisdom checks and wisdom saving throws for 7 days',
       icon: 'systems/dnd5e/icons/spells/rip-magenta-3.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_WEEK,
       changes: [
         {
@@ -894,7 +1088,7 @@ export default class EffectDefinitions {
       description:
         'Disadvantage on strength checks strength saving throws, and attacks that use strength for 7 days',
       icon: 'systems/dnd5e/icons/spells/rip-magenta-3.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_WEEK,
       changes: [
         {
@@ -922,7 +1116,7 @@ export default class EffectDefinitions {
       description:
         'Disadvantage on charisma checks and vulnerability to all damage',
       icon: 'systems/dnd5e/icons/spells/rip-magenta-3.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_WEEK,
       changes: [
         {
@@ -945,7 +1139,7 @@ export default class EffectDefinitions {
       description:
         'Disadvantage on intelligence checks and intelligence saving throws for 7 days',
       icon: 'systems/dnd5e/icons/spells/rip-magenta-3.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_WEEK,
       changes: [
         {
@@ -968,7 +1162,7 @@ export default class EffectDefinitions {
       description:
         'Disadvantage on dexterity checks, dexterity saving throws, and attacks that use dexterity for 7 days',
       icon: 'systems/dnd5e/icons/spells/rip-magenta-3.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_WEEK,
       changes: [
         {
@@ -996,7 +1190,7 @@ export default class EffectDefinitions {
       description:
         'Disadvantage on constitution checks and constitution saving throws for 7 days',
       icon: 'systems/dnd5e/icons/spells/rip-magenta-3.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_WEEK,
       changes: [
         {
@@ -1029,10 +1223,177 @@ export default class EffectDefinitions {
       ],
       atlChanges: [
         {
-          key: 'ATL.dimSight',
+          key: this._createAtlEffectKey('ATL.dimSight'),
           mode: CONST.ACTIVE_EFFECT_MODES.UPGRADE,
           value: '60',
           priority: 5,
+        },
+      ],
+    });
+  }
+
+  get _disguiseSelf() {
+    return new Effect({
+      name: 'Disguise Self',
+      description: 'No active effects and lasts for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/wind-grasp-eerie-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+    });
+  }
+
+  get _divineFavor() {
+    return new Effect({
+      name: 'Divine Favor',
+      description: 'Add 1d4 radiant damage to weapon attacks for 1 minute',
+      icon: 'systems/dnd5e/icons/spells/enchant-sky-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
+      changes: [
+        {
+          key: 'data.bonuses.weapon.damage',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '+1d4[radiant]',
+        },
+      ],
+    });
+  }
+
+  get _divineWord() {
+    return new Effect({
+      name: 'Divine Word',
+      description: 'Adds various effects based on the remaining hit points',
+      icon: 'systems/dnd5e/icons/spells/light-royal-3.jpg',
+      isDynamic: true,
+      flags: {
+        requiresActorUpdate: true,
+      },
+    });
+  }
+
+  get _enhanceAbility() {
+    return new Effect({
+      name: 'Enhance Ability',
+      description:
+        "Choose between Bear's Endurance, Bull's Strength, Cat's Grace, Eagle's Splendor, Fox's Cunning, or Owl's Wisdom",
+      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
+      nestedEffects: [
+        this._enhanceAbilityBearsEndurance,
+        this._enhanceAbilityBullsStrength,
+        this._enhanceAbilityCatsGrace,
+        this._enhanceAbilityEaglesSplendor,
+        this._enhanceAbilityFoxsCunning,
+        this._enhanceAbilityOwlsWisdom,
+      ],
+    });
+  }
+
+  get _enhanceAbilityBearsEndurance() {
+    return new Effect({
+      name: "Bear's Endurance",
+      description:
+        'Advantage on constitution checks and 2d6 temp hit points (rolled automatically) for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
+      isViewable: this._settings.showNestedEffects,
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      flags: {
+        requiresActorUpdate: true,
+      },
+      changes: [
+        {
+          key: 'flags.midi-qol.advantage.ability.check.con',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+      ],
+    });
+  }
+
+  get _enhanceAbilityBullsStrength() {
+    return new Effect({
+      name: "Bull's Strength",
+      description:
+        'Advantage on strength checks and double maximum carrying capacity for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
+      isViewable: this._settings.showNestedEffects,
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      changes: [
+        {
+          key: 'flags.midi-qol.advantage.ability.check.str',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'data.attributes.encumbrance.max',
+          mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+          value: '2',
+          priority: 5,
+        },
+      ],
+    });
+  }
+
+  get _enhanceAbilityCatsGrace() {
+    return new Effect({
+      name: "Cat's Grace",
+      description: 'Advantage on dexterity checks for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
+      isViewable: this._settings.showNestedEffects,
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      changes: [
+        {
+          key: 'flags.midi-qol.advantage.ability.check.dex',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+      ],
+    });
+  }
+
+  get _enhanceAbilityEaglesSplendor() {
+    return new Effect({
+      name: "Eagle's Splendor",
+      description: 'Advantage on charisma checks for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
+      isViewable: this._settings.showNestedEffects,
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      changes: [
+        {
+          key: 'flags.midi-qol.advantage.ability.check.cha',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+      ],
+    });
+  }
+
+  get _enhanceAbilityFoxsCunning() {
+    return new Effect({
+      name: "Fox's Cunning",
+      description: 'Advantage on intelligence checks for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
+      isViewable: this._settings.showNestedEffects,
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      changes: [
+        {
+          key: 'flags.midi-qol.advantage.ability.check.int',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+      ],
+    });
+  }
+
+  get _enhanceAbilityOwlsWisdom() {
+    return new Effect({
+      name: "Owl's Wisdom",
+      description: 'Advantage on wisdom checks for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
+      isViewable: this._settings.showNestedEffects,
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      changes: [
+        {
+          key: 'flags.midi-qol.advantage.ability.check.wis',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
         },
       ],
     });
@@ -1053,10 +1414,10 @@ export default class EffectDefinitions {
       description:
         'Add 1d4 to damage and advantage on strength checks and strength saving throws for 1 minute',
       icon: 'systems/dnd5e/icons/spells/link-blue-2.jpg',
-      isViewable: false,
+      isDynamic: true,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_MINUTE,
       changes: [
-        // TODO data.traits.size
         {
           key: 'data.bonuses.weapon.damage',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
@@ -1082,10 +1443,10 @@ export default class EffectDefinitions {
       description:
         'Subtract 1d4 from damage and disadvantage on strength checks and strength saving throws for 1 minute',
       icon: 'systems/dnd5e/icons/spells/link-blue-2.jpg',
-      isViewable: false,
+      isDynamic: true,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_MINUTE,
       changes: [
-        // TODO data.traits.size
         {
           key: 'data.bonuses.weapon.damage',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
@@ -1120,22 +1481,22 @@ export default class EffectDefinitions {
       ],
       atlChanges: [
         {
-          key: 'ATL.dimLight',
+          key: this._createAtlEffectKey('ATL.dimLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '10',
         },
         {
-          key: 'ATL.lightColor',
+          key: this._createAtlEffectKey('ATL.lightColor'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: Constants.COLORS.WHITE,
         },
         {
-          key: 'ATL.lightAlpha',
+          key: this._createAtlEffectKey('ATL.lightAlpha'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 0.25,
         },
         {
-          key: 'ATL.lightAnimation',
+          key: this._createAtlEffectKey('ATL.lightAnimation'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '{"type": "pulse","speed": 1,"intensity": 1}',
         },
@@ -1150,20 +1511,25 @@ export default class EffectDefinitions {
     });
   }
 
-  get _fly() {
+  get _falseLife() {
     return new Effect({
-      name: 'Fly',
-      description: 'Upgrade flying speed to 60 ft. for 10 minutes',
-      icon: 'systems/dnd5e/icons/spells/link-spirit-1.jpg',
-      seconds: Constants.SECONDS.IN_TEN_MINUTES,
-      changes: [
-        {
-          key: 'data.attributes.movement.fly',
-          mode: CONST.ACTIVE_EFFECT_MODES.UPGRADE,
-          value: '60',
-          priority: 5,
-        },
-      ],
+      name: 'False Life',
+      description:
+        'Add 1d4 + 4 temp hit points (rolled automatically) for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/heal-royal-1.jpg',
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      flags: {
+        requiresActorUpdate: true,
+      },
+    });
+  }
+
+  get _featherFall() {
+    return new Effect({
+      name: 'Feather Fall',
+      description: 'No active effects and lasts for 1 minute',
+      icon: 'systems/dnd5e/icons/spells/wind-magenta-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
     });
   }
 
@@ -1189,19 +1555,6 @@ export default class EffectDefinitions {
     });
   }
 
-  get _falseLife() {
-    return new Effect({
-      name: 'False Life',
-      description:
-        'Add 1d4 + 4 temp hit points (rolled automatically) for 1 hour',
-      icon: 'systems/dnd5e/icons/spells/heal-royal-1.jpg',
-      seconds: Constants.SECONDS.IN_ONE_HOUR,
-      flags: {
-        requiresActorUpdate: true,
-      },
-    });
-  }
-
   get _fireShield() {
     return new Effect({
       name: 'Fire Shield',
@@ -1219,7 +1572,7 @@ export default class EffectDefinitions {
       name: 'Fire Shield (Cold Resistance)',
       description: 'Add damage resistance to cold for 10 minutes',
       icon: 'systems/dnd5e/icons/spells/protect-red-3.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_TEN_MINUTES,
       changes: [
         {
@@ -1230,27 +1583,27 @@ export default class EffectDefinitions {
       ],
       atlChanges: [
         {
-          key: 'ATL.dimLight',
+          key: this._createAtlEffectKey('ATL.dimLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '20',
         },
         {
-          key: 'ATL.brightLight',
+          key: this._createAtlEffectKey('ATL.brightLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '10',
         },
         {
-          key: 'ATL.lightColor',
+          key: this._createAtlEffectKey('ATL.lightColor'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: Constants.COLORS.FIRE,
         },
         {
-          key: 'ATL.lightAlpha',
+          key: this._createAtlEffectKey('ATL.lightAlpha'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 0.25,
         },
         {
-          key: 'ATL.lightAnimation',
+          key: this._createAtlEffectKey('ATL.lightAnimation'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '{"type": "torch", "speed": 3, "intensity": 1}',
         },
@@ -1270,7 +1623,7 @@ export default class EffectDefinitions {
       name: 'Fire Shield (Fire Resistance)',
       description: 'Add damage resistance to fire for 10 minutes',
       icon: 'systems/dnd5e/icons/spells/protect-red-3.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_TEN_MINUTES,
       changes: [
         {
@@ -1281,27 +1634,27 @@ export default class EffectDefinitions {
       ],
       atlChanges: [
         {
-          key: 'ATL.dimLight',
+          key: this._createAtlEffectKey('ATL.dimLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '20',
         },
         {
-          key: 'ATL.brightLight',
+          key: this._createAtlEffectKey('ATL.brightLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '10',
         },
         {
-          key: 'ATL.lightColor',
+          key: this._createAtlEffectKey('ATL.lightColor'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: Constants.COLORS.COLD_FIRE,
         },
         {
-          key: 'ATL.lightAlpha',
+          key: this._createAtlEffectKey('ATL.lightAlpha'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 0.25,
         },
         {
-          key: 'ATL.lightAnimation',
+          key: this._createAtlEffectKey('ATL.lightAnimation'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '{"type": "torch", "speed": 3, "intensity": 1}',
         },
@@ -1316,78 +1669,62 @@ export default class EffectDefinitions {
     });
   }
 
-  get _enhanceAbility() {
+  get _findThePath() {
     return new Effect({
-      name: 'Enhance Ability',
-      description:
-        "Choose between Bear's Endurance, Bull's Strength, Cat's Grace, Eagle's Splendor, Fox's Cunning, or Owl's Wisdom",
-      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
-      nestedEffects: [
-        this._enhanceAbilityBearsEndurance,
-        this._enhanceAbilityBullsStrength,
-        this._enhanceAbilityCatsGrace,
-        this._enhanceAbilityEaglesSplendor,
-        this._enhanceAbilityFoxsCunning,
-        this._enhanceAbilityOwlsWisdom,
-      ],
+      name: 'Find the Path',
+      description: 'No active effects and lasts for 1 day',
+      icon: 'systems/dnd5e/icons/spells/light-jade-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_DAY,
     });
   }
 
-  get _enhanceAbilityBearsEndurance() {
+  get _fly() {
     return new Effect({
-      name: "Bear's Endurance",
-      description:
-        'Advantage on constitution checks and 2d6 temp hit points (rolled automatically) for 1 hour',
-      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
-      isViewable: false,
-      seconds: Constants.SECONDS.IN_ONE_HOUR,
-      flags: {
-        requiresActorUpdate: true,
-      },
+      name: 'Fly',
+      description: 'Upgrade flying speed to 60 ft. for 10 minutes',
+      icon: 'systems/dnd5e/icons/spells/link-spirit-1.jpg',
+      seconds: Constants.SECONDS.IN_TEN_MINUTES,
       changes: [
         {
-          key: 'flags.midi-qol.advantage.ability.check.con',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
-    });
-  }
-
-  get _enhanceAbilityBullsStrength() {
-    return new Effect({
-      name: "Bull's Strength",
-      description:
-        'Advantage on strength checks and double maximum carrying capacity for 1 hour',
-      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
-      isViewable: false,
-      seconds: Constants.SECONDS.IN_ONE_HOUR,
-      changes: [
-        {
-          key: 'flags.midi-qol.advantage.ability.check.str',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-        {
-          key: 'data.attributes.encumbrance.max',
-          mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
-          value: '2',
+          key: 'data.attributes.movement.fly',
+          mode: CONST.ACTIVE_EFFECT_MODES.UPGRADE,
+          value: '60',
           priority: 5,
         },
       ],
     });
   }
 
-  get _enhanceAbilityCatsGrace() {
+  get _foresight() {
     return new Effect({
-      name: "Cat's Grace",
-      description: 'Advantage on dexterity checks for 1 hour',
-      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
-      isViewable: false,
-      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      name: 'Foresight',
+      description:
+        'Grants advantage on attack rolls, ability checks, and saving throws while granting disadvantage to all who attack for 8 hours',
+      icon: 'systems/dnd5e/icons/spells/evil-eye-eerie-3.jpg',
+      seconds: Constants.SECONDS.IN_EIGHT_HOURS,
       changes: [
         {
-          key: 'flags.midi-qol.advantage.ability.check.dex',
+          key: 'flags.midi-qol.advantage.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.advantage.ability.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.advantage.ability.save.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.dnd5e.initiativeAdv',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.disadvantage.attack.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
@@ -1395,52 +1732,26 @@ export default class EffectDefinitions {
     });
   }
 
-  get _enhanceAbilityEaglesSplendor() {
+  get _freedomOfMovement() {
     return new Effect({
-      name: "Eagle's Splendor",
-      description: 'Advantage on charisma checks for 1 hour',
-      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
-      isViewable: false,
+      name: 'Freedom of Movement',
+      description: 'No active effects and lasts for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/slice-spirit-2.jpg',
       seconds: Constants.SECONDS.IN_ONE_HOUR,
-      changes: [
-        {
-          key: 'flags.midi-qol.advantage.ability.check.cha',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
     });
   }
 
-  get _enhanceAbilityFoxsCunning() {
+  get _globeOfInvulnerability() {
     return new Effect({
-      name: "Fox's Cunning",
-      description: 'Advantage on intelligence checks for 1 hour',
-      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
-      isViewable: false,
-      seconds: Constants.SECONDS.IN_ONE_HOUR,
-      changes: [
+      name: 'Globe of Invulnerability',
+      description: 'No active effects and lasts for 1 minute',
+      icon: 'systems/dnd5e/icons/spells/protect-blue-3.jpg',
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
+      tokenMagicChanges: [
         {
-          key: 'flags.midi-qol.advantage.ability.check.int',
+          key: 'macro.tokenMagic',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
-        },
-      ],
-    });
-  }
-
-  get _enhanceAbilityOwlsWisdom() {
-    return new Effect({
-      name: "Owl's Wisdom",
-      description: 'Advantage on wisdom checks for 1 hour',
-      icon: 'systems/dnd5e/icons/spells/haste-royal-2.jpg',
-      isViewable: false,
-      seconds: Constants.SECONDS.IN_ONE_HOUR,
-      changes: [
-        {
-          key: 'flags.midi-qol.advantage.ability.check.wis',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-          value: '1',
+          value: 'warp-field',
         },
       ],
     });
@@ -1475,19 +1786,18 @@ export default class EffectDefinitions {
       icon: 'systems/dnd5e/icons/spells/haste-sky-1.jpg',
       seconds: Constants.SECONDS.IN_ONE_MINUTE,
       changes: [
-        // TODO change this to an optional if supported
-        {
-          key: 'data.attributes.init.value',
-          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: '+1d4',
-        },
         {
           key: 'flags.midi-qol.optional.guidance.label',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: 'Guidance',
         },
         {
-          key: 'flags.midi-qol.optional.guidance.skill',
+          key: 'flags.midi-qol.optional.guidance.check.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '+1d4',
+        },
+        {
+          key: 'flags.midi-qol.optional.guidance.skill.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '+1d4',
         },
@@ -1501,7 +1811,7 @@ export default class EffectDefinitions {
       description:
         'Grants advantage to next attacker or until the end of next turn',
       icon: 'systems/dnd5e/icons/spells/fireball-sky-2.jpg',
-      seconds: Constants.SECONDS.IN_ONE_ROUND,
+      seconds: CONFIG.time.roundTime,
       turns: 1,
       flags: {
         dae: {
@@ -1596,10 +1906,50 @@ export default class EffectDefinitions {
     return new Effect({
       name: 'Hideous Laughter',
       description:
-        'Apply the effects of the prone and incapacitated conditions',
+        'Apply the effects of the prone and incapacitated conditions for 1 minute',
       icon: 'systems/dnd5e/icons/spells/explosion-magenta-2.jpg',
       seconds: Constants.SECONDS.IN_ONE_MINUTE,
       changes: [...this._incapacitated.changes, ...this._prone.changes],
+    });
+  }
+
+  get _holdMonster() {
+    return new Effect({
+      name: 'Hold Monster',
+      description: 'Apply the effects of the paralyzed condition for 1 minute',
+      icon: 'systems/dnd5e/icons/spells/shielding-fire-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
+      changes: [...this._paralyzed.changes],
+      tokenMagicChanges: [
+        {
+          key: 'macro.tokenMagic',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: 'mantle-of-madness',
+        },
+      ],
+    });
+  }
+
+  // TODO: potentially use overtime here if find a good way to do it
+  // flags.midi-qol.OverTime
+  // turn=end,
+  // saveAbility=wis,
+  // saveDC=30,
+  // label=Hold Person
+  get _holdPerson() {
+    return new Effect({
+      name: 'Hold Person',
+      description: 'Apply the effects of the paralyzed condition for 1 minute',
+      icon: 'systems/dnd5e/icons/spells/shielding-eerie-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
+      changes: [...this._paralyzed.changes],
+      tokenMagicChanges: [
+        {
+          key: 'macro.tokenMagic',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: 'mantle-of-madness',
+        },
+      ],
     });
   }
 
@@ -1612,7 +1962,7 @@ export default class EffectDefinitions {
       seconds: Constants.SECONDS.IN_ONE_MINUTE,
       changes: [
         {
-          key: 'flags.midi-qol.advantage.attack.all',
+          key: 'flags.midi-qol.advantage.ability.save.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '1',
         },
@@ -1624,22 +1974,22 @@ export default class EffectDefinitions {
       ],
       atlChanges: [
         {
-          key: 'ATL.dimLight',
+          key: this._createAtlEffectKey('ATL.dimLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '5',
         },
         {
-          key: 'ATL.lightColor',
+          key: this._createAtlEffectKey('ATL.lightColor'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: Constants.COLORS.WHITE,
         },
         {
-          key: 'ATL.lightAlpha',
+          key: this._createAtlEffectKey('ATL.lightAlpha'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 0.25,
         },
         {
-          key: 'ATL.lightAnimation',
+          key: this._createAtlEffectKey('ATL.lightAnimation'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '{"type": "sunburst", "speed": 2,"intensity": 4}',
         },
@@ -1682,6 +2032,48 @@ export default class EffectDefinitions {
     });
   }
 
+  get _irresistibleDance() {
+    return new Effect({
+      name: 'Irresistible Dance',
+      description:
+        'Zero movement, disadvantage on dexterity saving throws, disadvantage on attack rolls, and grants advantage to all who attack for 1 minute',
+      icon: 'systems/dnd5e/icons/spells/link-blue-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
+      changes: [
+        {
+          key: 'data.attributes.movement.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '0',
+          priority: 5,
+        },
+        {
+          key: 'flags.midi-qol.disadvantage.ability.save.dex',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.disadvantage.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.advantage.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+      ],
+    });
+  }
+
+  get _jump() {
+    return new Effect({
+      name: 'Jump',
+      description: 'No active effects and lasts for 1 minute',
+      icon: 'systems/dnd5e/icons/spells/wind-grasp-sky-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
+    });
+  }
+
   get _light() {
     return new Effect({
       name: 'Light',
@@ -1690,27 +2082,27 @@ export default class EffectDefinitions {
       seconds: Constants.SECONDS.IN_ONE_HOUR,
       atlChanges: [
         {
-          key: 'ATL.dimLight',
+          key: this._createAtlEffectKey('ATL.dimLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '40',
         },
         {
-          key: 'ATL.brightLight',
+          key: this._createAtlEffectKey('ATL.brightLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '20',
         },
         {
-          key: 'ATL.lightColor',
+          key: this._createAtlEffectKey('ATL.lightColor'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: Constants.COLORS.WHITE,
         },
         {
-          key: 'ATL.lightAlpha',
+          key: this._createAtlEffectKey('ATL.lightAlpha'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 0.25,
         },
         {
-          key: 'ATL.lightAnimation',
+          key: this._createAtlEffectKey('ATL.lightAnimation'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '{"type": "pulse", "speed": 3,"intensity": 1}',
         },
@@ -1726,12 +2118,11 @@ export default class EffectDefinitions {
       seconds: Constants.SECONDS.IN_ONE_HOUR,
       changes: [
         {
-          key: 'data.attributes.movement.walk',
-          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          key: 'data.attributes.movement.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '+10',
         },
       ],
-      isDynamic: true,
     });
   }
 
@@ -1771,7 +2162,7 @@ export default class EffectDefinitions {
   get _mirrorImage() {
     return new Effect({
       name: 'Mirror Image',
-      description: 'No active effects, but lasts for 1 minute',
+      description: 'No active effects and lasts for 1 minute',
       icon: 'systems/dnd5e/icons/spells/wind-grasp-magenta-2.jpg',
       seconds: Constants.SECONDS.IN_ONE_MINUTE,
       tokenMagicChanges: [
@@ -1793,7 +2184,7 @@ export default class EffectDefinitions {
       seconds: Constants.SECONDS.IN_ONE_HOUR,
       changes: [
         {
-          key: 'data.skills.ste.mod',
+          key: 'data.skills.ste.bonuses.check',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
           value: '+10',
         },
@@ -1823,7 +2214,7 @@ export default class EffectDefinitions {
       name: 'Protection from Acid',
       description: 'Adds damage resistance to acid for 1 hour',
       icon: 'systems/dnd5e/icons/spells/protect-jade-2.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_HOUR,
       changes: [
         {
@@ -1841,7 +2232,7 @@ export default class EffectDefinitions {
       name: 'Protection from Cold',
       description: 'Adds damage resistance to cold for 1 hour',
       icon: 'systems/dnd5e/icons/spells/protect-jade-2.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_HOUR,
       changes: [
         {
@@ -1859,7 +2250,7 @@ export default class EffectDefinitions {
       name: 'Protection from Fire',
       description: 'Adds damage resistance to fire for 1 hour',
       icon: 'systems/dnd5e/icons/spells/protect-jade-2.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_HOUR,
       changes: [
         {
@@ -1877,7 +2268,7 @@ export default class EffectDefinitions {
       name: 'Protection from Lightning',
       description: 'Adds damage resistance to lightning for 1 hour',
       icon: 'systems/dnd5e/icons/spells/protect-jade-2.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_HOUR,
       changes: [
         {
@@ -1895,7 +2286,7 @@ export default class EffectDefinitions {
       name: 'Protection from Thunder',
       description: 'Adds damage resistance to thunder for 1 hour',
       icon: 'systems/dnd5e/icons/spells/protect-jade-2.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_ONE_HOUR,
       changes: [
         {
@@ -1925,18 +2316,44 @@ export default class EffectDefinitions {
     });
   }
 
+  get _protectionFromEvilAndGood() {
+    return new Effect({
+      name: 'Protection from Evil and Good',
+      description: 'No active effects and lasts for 10 minutes',
+      icon: 'systems/dnd5e/icons/spells/protect-sky-2.jpg',
+      seconds: Constants.SECONDS.IN_TEN_MINUTES,
+    });
+  }
+
   get _rayOfFrost() {
     return new Effect({
       name: 'Ray of Frost',
       description: 'Lowers movement by 10 ft',
       icon: 'systems/dnd5e/icons/spells/beam-blue-1.jpg',
-      seconds: Constants.SECONDS.IN_ONE_ROUND,
+      seconds: CONFIG.time.roundTime,
       changes: [
         {
           key: 'data.attributes.movement.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '-10',
           priority: 5,
+        },
+      ],
+    });
+  }
+
+  get _regenerate() {
+    return new Effect({
+      name: 'Regenerate',
+      description: 'Regain 1 hit point at the start of each turn for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/heal-jade-3.jpg',
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      changes: [
+        {
+          key: 'flags.midi-qol.OverTime.regenerate',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+          value:
+            'label=Regenerate,turn=start,damageRoll=1,damageType=healing,condition=@attributes.hp.value > 0 && @attributes.hp.value < @attributes.hp.max',
         },
       ],
     });
@@ -1977,7 +2394,7 @@ export default class EffectDefinitions {
           value: 'Resistance',
         },
         {
-          key: 'flags.midi-qol.optional.resistance.save',
+          key: 'flags.midi-qol.optional.resistance.save.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
           value: '+1d4',
         },
@@ -1990,7 +2407,7 @@ export default class EffectDefinitions {
       name: 'Shield',
       description: 'Add 5 to AC until next turn',
       icon: 'systems/dnd5e/icons/spells/protect-magenta-1.jpg',
-      seconds: Constants.SECONDS.IN_ONE_ROUND,
+      seconds: CONFIG.time.roundTime,
       flags: {
         dae: {
           specialDuration: ['turnStart'],
@@ -2050,7 +2467,7 @@ export default class EffectDefinitions {
           value: '-2',
         },
         {
-          key: 'data.abilities.dex.save',
+          key: 'data.abilities.dex.bonuses.save',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
           value: '-2',
         },
@@ -2061,6 +2478,33 @@ export default class EffectDefinitions {
           priority: 5,
         },
       ],
+    });
+  }
+
+  get _speakWithAnimals() {
+    return new Effect({
+      name: 'Speak with Animals',
+      description: 'No active effects and lasts for 10 minutes',
+      icon: 'systems/dnd5e/icons/spells/wild-jade-1.jpg',
+      seconds: Constants.SECONDS.IN_TEN_MINUTES,
+    });
+  }
+
+  get _speakWithDead() {
+    return new Effect({
+      name: 'Speak with Dead',
+      description: 'No active effects and lasts for 10 minutes',
+      icon: 'systems/dnd5e/icons/spells/horror-acid-1.jpg',
+      seconds: Constants.SECONDS.IN_TEN_MINUTES,
+    });
+  }
+
+  get _speakWithPlants() {
+    return new Effect({
+      name: 'Speak with Plants',
+      description: 'No active effects and lasts for 10 minutes',
+      icon: 'systems/dnd5e/icons/spells/leaf-jade-1.jpg',
+      seconds: Constants.SECONDS.IN_TEN_MINUTES,
     });
   }
 
@@ -2078,6 +2522,15 @@ export default class EffectDefinitions {
           priority: 5,
         },
       ],
+    });
+  }
+
+  get _spiritGuardians() {
+    return new Effect({
+      name: 'Spirit Guardians',
+      description: 'No active effects and lasts for 10 minutes',
+      icon: 'systems/dnd5e/icons/spells/needles-sky-2.jpg',
+      seconds: Constants.SECONDS.IN_TEN_MINUTES,
     });
   }
 
@@ -2107,13 +2560,31 @@ export default class EffectDefinitions {
     });
   }
 
+  get _suggestion() {
+    return new Effect({
+      name: 'Suggestion',
+      description: 'No active effects and lasts for 8 hours',
+      icon: 'systems/dnd5e/icons/spells/air-burst-magenta-2.jpg',
+      seconds: Constants.SECONDS.IN_EIGHT_HOURS,
+    });
+  }
+
+  get _telekinesis() {
+    return new Effect({
+      name: 'Telekinesis',
+      description: 'No active effects and lasts for 10 minutes',
+      icon: 'systems/dnd5e/icons/spells/wind-grasp-air-3.jpg',
+      seconds: Constants.SECONDS.IN_TEN_MINUTES,
+    });
+  }
+
   get _trueStrike() {
     return new Effect({
       name: 'True Strike',
       description:
         'Grants advantage on next attack or until the end of next turn',
       icon: 'systems/dnd5e/icons/spells/enchant-sky-1.jpg',
-      seconds: Constants.SECONDS.IN_ONE_ROUND,
+      seconds: CONFIG.time.roundTime,
       turns: 1,
       flags: {
         dae: {
@@ -2135,8 +2606,8 @@ export default class EffectDefinitions {
       name: 'Vicious Mockery',
       description:
         'Grants disadvantage on next attack or until the end of next turn',
-      icon: 'systems/dnd5e/icons/skills/affliction_24.jpg',
-      seconds: Constants.SECONDS.IN_ONE_ROUND,
+      icon: 'icons/skills/toxins/cup-goblet-poisoned-spilled.webp',
+      seconds: CONFIG.time.roundTime,
       turns: 1,
       flags: {
         dae: {
@@ -2150,6 +2621,56 @@ export default class EffectDefinitions {
           value: '1',
         },
       ],
+    });
+  }
+
+  get _wardingBond() {
+    return new Effect({
+      name: 'Warding Bond',
+      description:
+        'Adds 1 to AC and saving throws and grants resistance to all damage for 1 hour',
+      icon: 'systems/dnd5e/icons/spells/protect-sky-2.jpg',
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
+      changes: [
+        {
+          key: 'data.attributes.ac.bonus',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '+1',
+        },
+        {
+          key: 'data.bonuses.abilities.save',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '+1',
+        },
+        {
+          key: 'data.traits.dr.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: 'physical',
+        },
+        {
+          key: 'data.traits.dr.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: 'magical',
+        },
+      ],
+    });
+  }
+
+  get _waterBreathing() {
+    return new Effect({
+      name: 'Water Breathing',
+      description: 'No active effects and lasts for 24 hours',
+      icon: 'icons/magic/water/pseudopod-swirl-blue.webp',
+      seconds: Constants.SECONDS.IN_ONE_DAY,
+    });
+  }
+
+  get _waterWalk() {
+    return new Effect({
+      name: 'Water Walk',
+      description: 'No active effects and lasts for 1 hour',
+      icon: 'icons/creatures/slimes/slime-movement-swirling-blue.webp',
+      seconds: Constants.SECONDS.IN_ONE_HOUR,
     });
   }
 
@@ -2175,27 +2696,27 @@ export default class EffectDefinitions {
       name: 'Bardic Inspiration (d6)',
       description: 'For bards from level 1 to level 4',
       icon: 'systems/dnd5e/icons/skills/yellow_08.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_TEN_MINUTES,
       changes: [
         {
           key: 'flags.midi-qol.optional.bardic-inspiration.label',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 'Bardic Inspiration',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.attack',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d6',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.save',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.save.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d6',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.skill',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.skill.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d6',
         },
       ],
@@ -2207,27 +2728,27 @@ export default class EffectDefinitions {
       name: 'Bardic Inspiration (d8)',
       description: 'For bards from level 5 to level 9',
       icon: 'systems/dnd5e/icons/skills/yellow_08.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_TEN_MINUTES,
       changes: [
         {
           key: 'flags.midi-qol.optional.bardic-inspiration.label',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 'Bardic Inspiration',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.attack',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d8',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.save',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.save.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d8',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.skill',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.skill.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d8',
         },
       ],
@@ -2239,27 +2760,27 @@ export default class EffectDefinitions {
       name: 'Bardic Inspiration (d10)',
       description: 'For bards from level 10 to level 14',
       icon: 'systems/dnd5e/icons/skills/yellow_08.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_TEN_MINUTES,
       changes: [
         {
           key: 'flags.midi-qol.optional.bardic-inspiration.label',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 'Bardic Inspiration',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.attack',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d10',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.save',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.save.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d10',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.skill',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.skill.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d10',
         },
       ],
@@ -2271,27 +2792,27 @@ export default class EffectDefinitions {
       name: 'Bardic Inspiration (d12)',
       description: 'For bards from level 15 to level 20',
       icon: 'systems/dnd5e/icons/skills/yellow_08.jpg',
-      isViewable: false,
+      isViewable: this._settings.showNestedEffects,
       seconds: Constants.SECONDS.IN_TEN_MINUTES,
       changes: [
         {
           key: 'flags.midi-qol.optional.bardic-inspiration.label',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 'Bardic Inspiration',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.attack',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d12',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.save',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.save.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d12',
         },
         {
-          key: 'flags.midi-qol.optional.bardic-inspiration.skill',
-          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          key: 'flags.midi-qol.optional.bardic-inspiration.skill.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '+1d12',
         },
       ],
@@ -2319,27 +2840,27 @@ export default class EffectDefinitions {
       ],
       atlChanges: [
         {
-          key: 'ATL.dimLight',
+          key: this._createAtlEffectKey('ATL.dimLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '40',
         },
         {
-          key: 'ATL.brightLight',
+          key: this._createAtlEffectKey('ATL.brightLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '20',
         },
         {
-          key: 'ATL.lightColor',
+          key: this._createAtlEffectKey('ATL.lightColor'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: Constants.COLORS.WHITE,
         },
         {
-          key: 'ATL.lightAlpha',
+          key: this._createAtlEffectKey('ATL.lightAlpha'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 0.25,
         },
         {
-          key: 'ATL.lightAnimation',
+          key: this._createAtlEffectKey('ATL.lightAnimation'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '{"type": "sunburst", "speed": 2,"intensity": 4}',
         },
@@ -2347,12 +2868,156 @@ export default class EffectDefinitions {
     });
   }
 
+  get _channelDivinityTurnTheUnholy() {
+    return new Effect({
+      name: 'Channel Divinity: Turn the Unholy',
+      description:
+        'No active effects and lasts for 1 minute. Expires on taking damage.',
+      icon: 'icons/magic/fire/explosion-embers-evade-silhouette.webp',
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
+      flags: {
+        dae: {
+          specialDuration: ['isDamaged'],
+        },
+      },
+    });
+  }
+
   get _channelDivinityTurnUndead() {
     return new Effect({
       name: 'Channel Divinity: Turn Undead',
-      description: 'No active effects, but lasts for 1 minute',
+      description:
+        'No active effects and lasts for 1 minute. Expires on taking damage.',
       icon: 'systems/dnd5e/icons/skills/yellow_19.jpg',
       seconds: Constants.SECONDS.IN_ONE_MINUTE,
+      flags: {
+        dae: {
+          specialDuration: ['isDamaged'],
+        },
+      },
+    });
+  }
+
+  get _kiEmptyBody() {
+    return new Effect({
+      name: 'Ki: Empty Body',
+      description:
+        'Grants advantage on attack rolls, forces disadvantage to all who attack, and grants resistance to all damage except force for 1 minute',
+      icon: 'icons/magic/perception/silhouette-stealth-shadow.webp',
+      seconds: Constants.SECONDS.IN_ONE_MINUTE,
+      changes: [
+        {
+          key: 'flags.midi-qol.advantage.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.disadvantage.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'physical',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'bludgeoning',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'piercing',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'slashing',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'silver',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'adamant',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'acid',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'cold',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'fire',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'lightning',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'necrotic',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'poison',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'psychic',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'radiant',
+        },
+        {
+          key: 'data.traits.dr.value',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 'thunder',
+        },
+      ],
+    });
+  }
+
+  get _kiPatientDefense() {
+    return new Effect({
+      name: 'Ki: Patient Defense',
+      description:
+        'Grants disadvantage to all who attack and advantage on all dexterity saving throws until next turn',
+      icon: 'icons/magic/defensive/shield-barrier-glowing-blue.webp',
+      flags: {
+        dae: {
+          specialDuration: ['turnStart'],
+        },
+      },
+      changes: [
+        {
+          key: 'flags.midi-qol.grants.disadvantage.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.advantage.ability.save.dex',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+      ],
     });
   }
 
@@ -2400,7 +3065,7 @@ export default class EffectDefinitions {
       description:
         'Advantage on melee attacks and grants advantage to those who attack for 1 turn',
       icon: 'systems/dnd5e/icons/skills/weapon_34.jpg',
-      seconds: Constants.SECONDS.IN_ONE_ROUND,
+      seconds: CONFIG.time.roundTime,
       changes: [
         {
           key: 'flags.midi-qol.advantage.attack.mwak',
@@ -2426,32 +3091,32 @@ export default class EffectDefinitions {
       seconds: Constants.SECONDS.IN_SIX_HOURS,
       atlChanges: [
         {
-          key: 'ATL.lightAngle',
+          key: this._createAtlEffectKey('ATL.lightAngle'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '60',
         },
         {
-          key: 'ATL.dimLight',
+          key: this._createAtlEffectKey('ATL.dimLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '60',
         },
         {
-          key: 'ATL.brightLight',
+          key: this._createAtlEffectKey('ATL.brightLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '30',
         },
         {
-          key: 'ATL.lightColor',
+          key: this._createAtlEffectKey('ATL.lightColor'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: Constants.COLORS.FIRE,
         },
         {
-          key: 'ATL.lightAlpha',
+          key: this._createAtlEffectKey('ATL.lightAlpha'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 0.4,
         },
         {
-          key: 'ATL.lightAnimation',
+          key: this._createAtlEffectKey('ATL.lightAnimation'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '{"type": "torch","speed": 1,"intensity": 1}',
         },
@@ -2467,27 +3132,27 @@ export default class EffectDefinitions {
       seconds: Constants.SECONDS.IN_ONE_HOUR,
       atlChanges: [
         {
-          key: 'ATL.dimLight',
+          key: this._createAtlEffectKey('ATL.dimLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '10',
         },
         {
-          key: 'ATL.brightLight',
+          key: this._createAtlEffectKey('ATL.brightLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '5',
         },
         {
-          key: 'ATL.lightColor',
+          key: this._createAtlEffectKey('ATL.lightColor'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: Constants.COLORS.FIRE,
         },
         {
-          key: 'ATL.lightAlpha',
+          key: this._createAtlEffectKey('ATL.lightAlpha'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 0.2,
         },
         {
-          key: 'ATL.lightAnimation',
+          key: this._createAtlEffectKey('ATL.lightAnimation'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '{"type": "torch","speed": 1,"intensity": 1}',
         },
@@ -2503,27 +3168,27 @@ export default class EffectDefinitions {
       seconds: Constants.SECONDS.IN_SIX_HOURS,
       atlChanges: [
         {
-          key: 'ATL.dimLight',
+          key: this._createAtlEffectKey('ATL.dimLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '5',
         },
         {
-          key: 'ATL.brightLight',
+          key: this._createAtlEffectKey('ATL.brightLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '0',
         },
         {
-          key: 'ATL.lightColor',
+          key: this._createAtlEffectKey('ATL.lightColor'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: Constants.COLORS.FIRE,
         },
         {
-          key: 'ATL.lightAlpha',
+          key: this._createAtlEffectKey('ATL.lightAlpha'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 0.4,
         },
         {
-          key: 'ATL.lightAnimation',
+          key: this._createAtlEffectKey('ATL.lightAnimation'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '{"type": "torch","speed": 1,"intensity": 1}',
         },
@@ -2539,27 +3204,27 @@ export default class EffectDefinitions {
       seconds: Constants.SECONDS.IN_SIX_HOURS,
       atlChanges: [
         {
-          key: 'ATL.dimLight',
+          key: this._createAtlEffectKey('ATL.dimLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '60',
         },
         {
-          key: 'ATL.brightLight',
+          key: this._createAtlEffectKey('ATL.brightLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '30',
         },
         {
-          key: 'ATL.lightColor',
+          key: this._createAtlEffectKey('ATL.lightColor'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: Constants.COLORS.FIRE,
         },
         {
-          key: 'ATL.lightAlpha',
+          key: this._createAtlEffectKey('ATL.lightAlpha'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 0.4,
         },
         {
-          key: 'ATL.lightAnimation',
+          key: this._createAtlEffectKey('ATL.lightAnimation'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '{"type": "torch","speed": 1,"intensity": 1}',
         },
@@ -2575,27 +3240,27 @@ export default class EffectDefinitions {
       seconds: Constants.SECONDS.IN_ONE_HOUR,
       atlChanges: [
         {
-          key: 'ATL.dimLight',
+          key: this._createAtlEffectKey('ATL.dimLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '40',
         },
         {
-          key: 'ATL.brightLight',
+          key: this._createAtlEffectKey('ATL.brightLight'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '20',
         },
         {
-          key: 'ATL.lightColor',
+          key: this._createAtlEffectKey('ATL.lightColor'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: Constants.COLORS.FIRE,
         },
         {
-          key: 'ATL.lightAlpha',
+          key: this._createAtlEffectKey('ATL.lightAlpha'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: 0.4,
         },
         {
-          key: 'ATL.lightAnimation',
+          key: this._createAtlEffectKey('ATL.lightAnimation'),
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '{"type": "torch","speed": 1,"intensity": 1}',
         },
@@ -2604,6 +3269,19 @@ export default class EffectDefinitions {
   }
 
   /* Other effects */
+  get _bonusAction() {
+    return new Effect({
+      name: 'Bonus Action',
+      description: 'No active effects and expires on turn start',
+      icon: 'modules/dfreds-convenient-effects/images/bonus-action.svg',
+      flags: {
+        dae: {
+          specialDuration: ['turnStart', 'shortRest', 'longRest'],
+        },
+      },
+    });
+  }
+
   get _coverHalf() {
     return new Effect({
       name: 'Cover (Half)',
@@ -2616,7 +3294,7 @@ export default class EffectDefinitions {
           value: '+2',
         },
         {
-          key: 'data.abilities.dex.save',
+          key: 'data.abilities.dex.bonuses.save',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
           value: '+2',
         },
@@ -2636,7 +3314,7 @@ export default class EffectDefinitions {
           value: '+5',
         },
         {
-          key: 'data.abilities.dex.save',
+          key: 'data.abilities.dex.bonuses.save',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
           value: '+5',
         },
@@ -2649,7 +3327,14 @@ export default class EffectDefinitions {
       name: 'Encumbered',
       description: 'Lowers movement by 10 ft.',
       icon: 'icons/svg/down.svg',
-      isDynamic: true,
+      changes: [
+        {
+          key: 'data.attributes.movement.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '-10',
+          priority: 5,
+        },
+      ],
     });
   }
 
@@ -2745,8 +3430,13 @@ export default class EffectDefinitions {
       description:
         'Lowers movement by 20 ft., disadvantage on all attack rolls, and disadvantage on strength, dexterity, and constitution saves',
       icon: 'icons/svg/downgrade.svg',
-      isDynamic: true,
       changes: [
+        {
+          key: 'data.attributes.movement.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '-20',
+          priority: 5,
+        },
         {
           key: 'flags.midi-qol.disadvantage.attack.all',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
@@ -2765,6 +3455,27 @@ export default class EffectDefinitions {
         {
           key: 'flags.midi-qol.disadvantage.ability.save.con',
           mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+      ],
+    });
+  }
+
+  get _inspiration() {
+    return new Effect({
+      name: 'Inspiration',
+      description:
+        'Advantage on everything and expires after any action, save, check, or skill roll',
+      icon: 'icons/magic/control/buff-luck-fortune-green.webp',
+      flags: {
+        dae: {
+          specialDuration: ['1Action', 'isSave', 'isCheck', 'isSkill'],
+        },
+      },
+      changes: [
+        {
+          key: 'flags.midi-qol.advantage.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value: '1',
         },
       ],
@@ -2798,7 +3509,7 @@ export default class EffectDefinitions {
       icon: 'modules/dfreds-convenient-effects/images/reaction.svg',
       flags: {
         dae: {
-          specialDuration: ['turnStart'],
+          specialDuration: ['turnStart', 'shortRest', 'longRest'],
         },
       },
     });
@@ -2837,4 +3548,54 @@ export default class EffectDefinitions {
       ],
     });
   }
+
+  _createAtlEffectKey(key) {
+    let result = key;
+    const version = (game.version ?? game.data.version).charAt(0);
+
+    if (version == '9') {
+      switch (key) {
+        case 'ATL.preset':
+          break;
+        case 'ATL.brightSight':
+          break;
+        case 'ATL.dimSight':
+          break;
+        case 'ATL.height':
+          break;
+        case 'ATl.img':
+          break;
+        case 'ATL.mirrorX':
+          break;
+        case 'ATL.mirrorY':
+          break;
+        case 'ATL.rotation':
+          break;
+        case 'ATL.scale':
+          break;
+        case 'ATL.width':
+          break;
+        case 'ATL.dimLight':
+          result = 'ATL.light.dim';
+          break;
+        case 'ATL.brightLight':
+          result = 'ATL.light.bright';
+          break;
+        case 'ATL.lightAnimation':
+          result = 'ATL.light.animation';
+          break;
+        case 'ATL.lightColor':
+          result = 'ATL.light.color';
+          break;
+        case 'ATL.lightAlpha':
+          result = 'ATL.light.alpha';
+          break;
+        case 'ATL.lightAngle':
+          result = 'ATL.light.angle';
+          break;
+      }
+    }
+    return result;
+  }
 }
+
