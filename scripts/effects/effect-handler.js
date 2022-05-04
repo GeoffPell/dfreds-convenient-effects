@@ -2,6 +2,7 @@ import DynamicEffectsAdder from './dynamic-effects-adder.js';
 import FoundryHelpers from '../foundry-helpers.js';
 import Settings from '../settings.js';
 import log from '../logger.js';
+import Effect from './effect.js';
 
 /**
  * Handles toggling on and off effects on actors
@@ -14,60 +15,19 @@ export default class EffectHandler {
   }
 
   /**
-   * Searches through the list of available effects and returns one matching the
-   * effect name
-   *
-   * @param {string} effectName - the effect name to search for
-   * @returns {Effect} the found effect
-   */
-  findEffectByName(effectName) {
-    return game.dfreds.effects.all.find((effect) => effect.name == effectName);
-  }
-
-  /**
-   * Prompts the user to select a nested effect from the choices available
-   *
-   * @param {Effect} effect - the parent effect
-   * @returns {Effect} the chosen nested effect
-   */
-  async getNestedEffectSelection(effect) {
-    const content = await renderTemplate(
-      'modules/dfreds-convenient-effects/templates/nested-effects-dialog.html',
-      { parentEffect: effect }
-    );
-    const choice = await Dialog.prompt(
-      {
-        title: effect.name,
-        content: content,
-        label: 'Select Effect',
-        callback: (html) => {
-          const htmlChoice = html.find('select[name="effect-choice"]').val();
-          return htmlChoice;
-        },
-        rejectClose: false,
-      },
-      { width: 300 }
-    );
-
-    return effect.nestedEffects.find(
-      (nestedEffect) => nestedEffect.name == choice
-    );
-  }
-
-  /**
    * Toggles an effect on or off by name on an actor by UUID
    *
    * @param {string} effectName - name of the effect to toggle
-   * @param {string[]} uuids - uuids to apply the effect to
+   * @param {object} params - the effect parameters
+   * @param {boolean} params.overlay - if the effect is an overlay or not
+   * @param {string[]} params.uuids - UUIDS of the actors to toggle the effect on
    */
-  async toggleEffect(effectName, ...uuids) {
-    let effect = this.findEffectByName(effectName);
-
+  async toggleEffect(effectName, { overlay, uuids }) {
     for (const uuid of uuids) {
       if (await this.hasEffectApplied(effectName, uuid)) {
-        await this.removeEffect(effect.name, uuid);
+        await this.removeEffect({ effectName, uuid });
       } else {
-        await this.addEffect(effect.name, uuid);
+        await this.addEffect({ effectName, uuid, overlay });
       }
     }
   }
@@ -81,12 +41,13 @@ export default class EffectHandler {
    * applied to
    * @returns {boolean} true if the effect is applied, false otherwise
    */
-  async hasEffectApplied(effectName, uuid) {
-    const actor = await this._foundryHelpers.getActorByUuid(uuid);
+  hasEffectApplied(effectName, uuid) {
+    const actor = this._foundryHelpers.getActorByUuid(uuid);
     return actor?.data?.effects?.some(
       (activeEffect) =>
         activeEffect?.data?.flags?.isConvenient &&
-        activeEffect?.data?.label == effectName
+        activeEffect?.data?.label == effectName &&
+        !activeEffect?.data?.disabled
     );
   }
 
@@ -94,33 +55,47 @@ export default class EffectHandler {
    * Removes the effect with the provided name from an actor matching the
    * provided UUID
    *
-   * @param {string} effectName - the name of the effect to remove
-   * @param {string} uuid - the uuid of the actor to remove the effect from
+   * @param {object} params - the effect parameters
+   * @param {string} params.effectName - the name of the effect to remove
+   * @param {string} params.uuid - the uuid of the actor to remove the effect from
    */
-  async removeEffect(effectName, uuid) {
-    const actor = await this._foundryHelpers.getActorByUuid(uuid);
+  async removeEffect({ effectName, uuid }) {
+    const actor = this._foundryHelpers.getActorByUuid(uuid);
     const effectToRemove = actor.data.effects.find(
       (activeEffect) =>
         activeEffect?.data?.flags?.isConvenient &&
         activeEffect?.data?.label == effectName
     );
 
-    if (effectToRemove) {
-      await actor.deleteEmbeddedDocuments('ActiveEffect', [effectToRemove.id]);
-      log(`Removed effect ${effectName} from ${actor.name} - ${actor.id}`);
-    }
+    if (!effectToRemove) return;
+
+    await effectToRemove.delete();
+    log(`Removed effect ${effectName} from ${actor.name} - ${actor.id}`);
   }
 
   /**
    * Adds the effect with the provided name to an actor matching the provided
    * UUID
    *
-   * @param {string} effectName - the name of the effect to add
-   * @param {string} uuid - the uuid of the actor to add the effect to
+   * @param {object} params - the effect parameters
+   * @param {string} params.effectName - the name of the effect to add
+   * @param {object} params.effectData - the effect data to add if effectName is not provided
+   * @param {string} params.uuid - the uuid of the actor to add the effect to
+   * @param {string} params.origin - the origin of the effect
+   * @param {boolean} params.overlay - if the effect is an overlay or not
    */
-  async addEffect(effectName, uuid, origin) {
-    let effect = this.findEffectByName(effectName);
-    const actor = await this._foundryHelpers.getActorByUuid(uuid);
+  async addEffect({ effectName, effectData, uuid, origin, overlay }) {
+    let effect = game.dfreds.effectInterface.findEffectByName(effectName);
+
+    if (!effect && effectData) {
+      effect = new Effect(effectData);
+    }
+
+    const actor = this._foundryHelpers.getActorByUuid(uuid);
+
+    if (effect.name.startsWith('Exhaustion')) {
+      await this._removeAllExhaustionEffects(uuid);
+    }
 
     if (effect.isDynamic) {
       await this._dynamicEffectsAdder.addDynamicEffects(effect, actor);
@@ -128,14 +103,25 @@ export default class EffectHandler {
 
     this._handleIntegrations(effect);
 
-    const activeEffectData = effect.convertToActiveEffectData(origin);
+    const activeEffectData = effect.convertToActiveEffectData({
+      origin,
+      overlay,
+    });
     await actor.createEmbeddedDocuments('ActiveEffect', [activeEffectData]);
 
     log(`Added effect ${effect.name} to ${actor.name} - ${actor.id}`);
   }
 
+  async _removeAllExhaustionEffects(uuid) {
+    await this.removeEffect({ effectName: 'Exhaustion 1', uuid });
+    await this.removeEffect({ effectName: 'Exhaustion 2', uuid });
+    await this.removeEffect({ effectName: 'Exhaustion 3', uuid });
+    await this.removeEffect({ effectName: 'Exhaustion 4', uuid });
+    await this.removeEffect({ effectName: 'Exhaustion 5', uuid });
+  }
+
   _handleIntegrations(effect) {
-    if (this._settings.integrateWithAtl && effect.atlChanges.length > 0) {
+    if (this._settings.integrateWithAte && effect.atlChanges.length > 0) {
       this._addAtlChangesToEffect(effect);
     }
 

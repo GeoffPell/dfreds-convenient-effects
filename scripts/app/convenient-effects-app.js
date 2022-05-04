@@ -48,47 +48,31 @@ export default class ConvenientEffectsApp extends Application {
   }
 
   /**
-   * Adds the droptarget CSS class to the favorites directory
-   */
-  addDropTargetClassToFavorites() {
-    if (this._favoritesDirectory.hasClass('droptarget')) return;
-    this._favoritesDirectory.addClass('droptarget');
-  }
-
-  /**
-   * Removes the droptarget CSS class from the favorites directory
-   */
-  removeDropTargetClassFromFavorites() {
-    if (!this._favoritesDirectory.hasClass('droptarget')) return;
-    this._favoritesDirectory.removeClass('droptarget');
-  }
-
-  /**
    * Checks if the folder is collapsed
    *
-   * @param {string} folderName - the folder name to check
+   * @param {string} folderId - the folder ID to check
    * @returns {boolean} true if the folder is collapsed, false otherwise
    */
-  isFolderCollapsed(folderName) {
-    return this._getFolderByName(folderName).hasClass('collapsed');
+  isFolderCollapsed(folderId) {
+    return this._getFolderById(folderId).hasClass('collapsed');
   }
 
   /**
    * Collapses a folder by adding the 'collapsed' CSS class to it
    *
-   * @param {string} folderName - the folder name to collapse
+   * @param {string} folderId - the folder ID to collapse
    */
-  collapseFolder(folderName) {
-    this._getFolderByName(folderName).addClass('collapsed');
+  collapseFolder(folderId) {
+    this._getFolderById(folderId).addClass('collapsed');
   }
 
   /**
    * Expands a folder by removing the 'collapsed' CSS class from it
    *
-   * @param {string} folderName - the folder name to expand
+   * @param {string} folderId - the folder ID to expand
    */
-  expandFolder(folderName) {
-    this._getFolderByName(folderName).removeClass('collapsed');
+  expandFolder(folderId) {
+    this._getFolderById(folderId).removeClass('collapsed');
   }
 
   /**
@@ -107,76 +91,89 @@ export default class ConvenientEffectsApp extends Application {
     );
   }
 
-  _getFolderByName(folderName) {
-    return this._rootView.find(`.folder[data-folder-label="${folderName}"]`);
+  _getFolderById(folderId) {
+    return this._rootView.find(`.folder[data-folder-id="${folderId}"]`);
   }
 
   _initClickListeners() {
-    this._createEffectButton.on(
-      'click',
-      this._controller.onCreateEffectClick.bind(this._controller)
-    );
-    this._resetStatusEffectsButton.on(
-      'click',
-      this._controller.onResetStatusEffectsClick.bind(this._controller)
-    );
     this._collapseAllButton.on(
       'click',
       this._controller.onCollapseAllClick.bind(this._controller)
     );
-    this._folderHeaders.on(
+    this._createEffectButton.on(
       'click',
-      this._controller.onFolderClick.bind(this._controller)
+      this._controller.onCreateEffectClick.bind(this._controller)
     );
     this._effectListItems.on(
       'click',
       this._controller.onEffectClick.bind(this._controller)
     );
+    this._exportCustomEffectsButton.on(
+      'click',
+      this._controller.onExportCustomEffectsClick.bind(this._controller)
+    );
+    this._folderHeaders.on(
+      'click',
+      this._controller.onFolderClick.bind(this._controller)
+    );
+    this._importCustomEffectsButton.on(
+      'click',
+      this._controller.onImportCustomEffectsClick.bind(this._controller)
+    );
+    this._resetStatusEffectsButton.on(
+      'click',
+      this._controller.onResetStatusEffectsClick.bind(this._controller)
+    );
   }
 
-  // TODO better way of determining what contexts menus to put on a given entity - for edit/delete custom effects
   _initContextMenus() {
-    new ContextMenu(this._nonFavoritesNonCustomDirectories, '.entity', [
-      {
-        name: 'Add Favorite',
-        icon: '<i class="fas fa-star fa-fw"></i>',
-        callback: this._controller.onAddFavorite.bind(this._controller),
-      },
-      {
-        name: 'Toggle Status Effect',
-        icon: '<i class="fas fa-street-view fa-fw"></i>',
-        callback: this._controller.onToggleStatusEffect.bind(this._controller),
-      },
-    ]);
-
-    new ContextMenu(this._favoritesDirectory, '.entity', [
-      {
-        name: 'Remove Favorite',
-        icon: '<i class="far fa-star fa-fw"></i>',
-        callback: this._controller.onRemoveFavorite.bind(this._controller),
-      },
-      {
-        name: 'Toggle Status Effect',
-        icon: '<i class="fas fa-street-view fa-fw"></i>',
-        callback: this._controller.onToggleStatusEffect.bind(this._controller),
-      },
-    ]);
-
-    new ContextMenu(this._customDirectory, '.entity', [
+    new ContextMenu(this._allDirectories, '.entity', [
       {
         name: 'Edit Effect',
         icon: '<i class="fas fa-edit fa-fw"></i>',
+        condition: (effectItem) => {
+          return this._controller.isCustomEffect(effectItem);
+        },
         callback: this._controller.onEditEffectClick.bind(this._controller),
       },
       {
         name: 'Delete Effect',
         icon: '<i class="fas fa-trash fa-fw"></i>',
+        condition: (effectItem) => {
+          return this._controller.isCustomEffect(effectItem);
+        },
         callback: this._controller.onDeleteEffectClick.bind(this._controller),
+      },
+      {
+        name: 'Add Favorite',
+        icon: '<i class="fas fa-star fa-fw"></i>',
+        condition: (effectItem) => {
+          return !this._controller.isFavoritedEffect(effectItem);
+        },
+        callback: this._controller.onAddFavorite.bind(this._controller),
+      },
+      {
+        name: 'Remove Favorite',
+        icon: '<i class="far fa-star fa-fw"></i>',
+        condition: (effectItem) => {
+          return this._controller.isFavoritedEffect(effectItem);
+        },
+        callback: this._controller.onRemoveFavorite.bind(this._controller),
+      },
+      {
+        name: 'Toggle as Overlay',
+        icon: '<i class="far fa-dot-circle fa-fw"></i>',
+        callback: this._controller.onToggleOverlay.bind(this._controller),
       },
       {
         name: 'Toggle Status Effect',
         icon: '<i class="fas fa-street-view fa-fw"></i>',
         callback: this._controller.onToggleStatusEffect.bind(this._controller),
+      },
+      {
+        name: 'Duplicate as Custom',
+        icon: '<i class="far fa-copy fa-fw"></i>',
+        callback: this._controller.onDuplicateAsCustom.bind(this._controller),
       },
     ]);
   }
@@ -184,19 +181,11 @@ export default class ConvenientEffectsApp extends Application {
   _initDragDrop() {
     const dragDrop = new DragDrop({
       dragSelector: '.entity',
-      dropSelector: '.folder',
       callbacks: {
         dragstart: this._controller.onEffectDragStart.bind(this._controller),
-        dragover: this._controller.onFolderDragOver.bind(this._controller),
-        drop: this._controller.onDropOntoFolder.bind(this._controller),
       },
     });
     dragDrop.bind(this._rootView[0]);
-
-    this._favoritesDirectory.on(
-      'dragleave',
-      this._controller.onFolderDragLeave.bind(this._controller)
-    );
   }
 
   _initSearchFilters() {
@@ -221,35 +210,20 @@ export default class ConvenientEffectsApp extends Application {
     return this._rootView.find('.collapse-all');
   }
 
-  get _customDirectory() {
-    return this._rootView.find('.folder[data-folder-label="Custom"]');
-  }
-
   get _effectListItems() {
     return this._rootView.find('.entity');
   }
 
-  get _favoritesDirectory() {
-    return this._rootView.find('.folder[data-folder-label="Favorites"]');
-  }
-
-  get _favoritesItems() {
-    return this._favoritesDirectory.find('.entity');
-  }
-
-  get _favoritesSubdirectory() {
-    return this._favoritesDirectory.find('.subdirectory');
+  get _exportCustomEffectsButton() {
+    return this._rootView.find('.export-custom-effects');
   }
 
   get _folderHeaders() {
     return this._rootView.find('.directory-list .folder-header');
   }
 
-  get _nonFavoritesNonCustomDirectories() {
-    return this._rootView
-      .find('.folder')
-      .filter(':not([data-folder-label="Favorites"])')
-      .filter(':not([data-folder-label="Custom"])');
+  get _importCustomEffectsButton() {
+    return this._rootView.find('.import-custom-effects');
   }
 
   get _resetStatusEffectsButton() {

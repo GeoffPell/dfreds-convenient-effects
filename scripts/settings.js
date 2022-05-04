@@ -1,16 +1,18 @@
+import Constants from './constants.js';
+
 /**
  * Handle setting and fetching all settings in the module
  */
 export default class Settings {
-  static PACKAGE_NAME = 'dfreds-convenient-effects';
-
   // Settings keys
   static CHAT_MESSAGE_PERMISSION = 'chatMessagePermission';
   static CONTROLS_PERMISSION = 'controlsPermission';
-  static INTEGRATE_WITH_ATL = 'integrateWithAtl';
+  static INTEGRATE_WITH_ATE = 'integrateWithAtl';
   static INTEGRATE_WITH_TOKEN_MAGIC = 'integrateWithTokenMagic';
   static MODIFY_STATUS_EFFECTS = 'modifyStatusEffects';
   static PRIORITIZE_TARGETS = 'prioritizeTargets';
+  static SHOW_CHAT_MESSAGE_EFFECT_DESCRIPTION = 'chatMessageEffectDescription';
+  static SHOW_NESTED_EFFECTS = 'showNestedEffects';
 
   static FAVORITE_EFFECT_NAMES = 'favoriteEffectNames';
   static STATUS_EFFECT_NAMES = 'statusEffectNames';
@@ -29,7 +31,7 @@ export default class Settings {
     userRoles[5] = 'None';
 
     game.settings.register(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.CHAT_MESSAGE_PERMISSION,
       {
         name: 'Chat Message Permission',
@@ -42,24 +44,20 @@ export default class Settings {
       }
     );
 
-    game.settings.register(
-      Settings.PACKAGE_NAME,
-      Settings.CONTROLS_PERMISSION,
-      {
-        name: 'Controls Permission',
-        hint: 'This defines the minimum permission level to see and apply Convenient Effects via the token controls. Setting this to None will disable the controls entirely.',
-        scope: 'world',
-        config: true,
-        default: CONST.USER_ROLES.GAMEMASTER,
-        choices: userRoles,
-        type: String,
-        onChange: () => window.location.reload(),
-      }
-    );
+    game.settings.register(Constants.MODULE_ID, Settings.CONTROLS_PERMISSION, {
+      name: 'Controls Permission',
+      hint: 'This defines the minimum permission level to see and apply Convenient Effects via the token controls. Setting this to None will disable the controls entirely.',
+      scope: 'world',
+      config: true,
+      default: CONST.USER_ROLES.GAMEMASTER,
+      choices: userRoles,
+      type: String,
+      onChange: () => window.location.reload(),
+    });
 
-    game.settings.register(Settings.PACKAGE_NAME, Settings.INTEGRATE_WITH_ATL, {
-      name: 'Integrate with ATL',
-      hint: 'If enabled, certain effects will also change light emitted from tokens via Active Token Lighting.',
+    game.settings.register(Constants.MODULE_ID, Settings.INTEGRATE_WITH_ATE, {
+      name: 'Integrate with ATE',
+      hint: 'If enabled, certain effects will also change light emitted from tokens or the size of a token via Active Token Effects.',
       scope: 'world',
       config: true,
       default: true,
@@ -67,7 +65,7 @@ export default class Settings {
     });
 
     game.settings.register(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.INTEGRATE_WITH_TOKEN_MAGIC,
       {
         name: 'Integrate with Token Magic',
@@ -80,7 +78,7 @@ export default class Settings {
     );
 
     game.settings.register(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.MODIFY_STATUS_EFFECTS,
       {
         name: 'Modify Status Effects',
@@ -98,7 +96,7 @@ export default class Settings {
       }
     );
 
-    game.settings.register(Settings.PACKAGE_NAME, Settings.PRIORITIZE_TARGETS, {
+    game.settings.register(Constants.MODULE_ID, Settings.PRIORITIZE_TARGETS, {
       name: 'Prioritize Targets',
       hint: 'If enabled, effects will be applied to any targeted tokens instead of selected tokens.',
       scope: 'client',
@@ -108,39 +106,63 @@ export default class Settings {
     });
 
     game.settings.register(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
+      Settings.SHOW_CHAT_MESSAGE_EFFECT_DESCRIPTION,
+      {
+        name: 'Show Chat Message Effect Description',
+        hint: 'This is when effect descriptions are shown on chat messages.',
+        scope: 'world',
+        config: true,
+        default: true,
+        default: 'onAddOrRemove',
+        choices: {
+          onAddOrRemove: 'On Add or Remove',
+          onAddOnly: 'On Add Only',
+          never: 'Never',
+        },
+        type: String,
+      }
+    );
+
+    game.settings.register(Constants.MODULE_ID, Settings.SHOW_NESTED_EFFECTS, {
+      name: 'Show Nested Effects',
+      hint: 'If enabled, nested effects will be shown in the application.',
+      scope: 'client',
+      config: true,
+      default: false,
+      type: Boolean,
+    });
+
+    game.settings.register(
+      Constants.MODULE_ID,
       Settings.FAVORITE_EFFECT_NAMES,
       {
         name: 'Favorite Effect Names',
         scope: 'client',
         config: false,
         default: '',
-        type: String,
+        type: Array,
       }
     );
 
-    game.settings.register(
-      Settings.PACKAGE_NAME,
-      Settings.STATUS_EFFECT_NAMES,
-      {
-        name: 'Status Effect Names',
-        scope: 'world',
-        config: false,
-        default: this._defaultStatusEffectNames,
-        type: String,
-      }
-    );
+    game.settings.register(Constants.MODULE_ID, Settings.STATUS_EFFECT_NAMES, {
+      name: 'Status Effect Names',
+      scope: 'world',
+      config: false,
+      default: this._defaultStatusEffectNames,
+      type: Array,
+    });
 
-    game.settings.register(Settings.PACKAGE_NAME, Settings.EXPANDED_FOLDERS, {
+    game.settings.register(Constants.MODULE_ID, Settings.EXPANDED_FOLDERS, {
       name: 'Expanded Folders',
       scope: 'client',
       config: false,
       default: 'Favorites',
-      type: String,
+      type: Array,
     });
 
     game.settings.register(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.CUSTOM_EFFECTS_ITEM_ID,
       {
         name: 'Custom Effects Item ID',
@@ -150,6 +172,54 @@ export default class Settings {
         type: String,
       }
     );
+  }
+
+  async migrateOldSettings() {
+    let didMigrate = false;
+
+    if (game.user.isGM) {
+      if (
+        this.favoriteEffectNames.length === 1 &&
+        this.favoriteEffectNames[0].includes(';')
+      ) {
+        didMigrate = true;
+        await game.settings.set(
+          Constants.MODULE_ID,
+          Settings.FAVORITE_EFFECT_NAMES,
+          this.favoriteEffectNames[0].split(';')
+        );
+      }
+
+      if (
+        this.expandedFolders.length === 1 &&
+        this.expandedFolders[0].includes(';')
+      ) {
+        didMigrate = true;
+        await game.settings.set(
+          Constants.MODULE_ID,
+          Settings.EXPANDED_FOLDERS,
+          this.expandedFolders[0].split(';')
+        );
+      }
+
+      if (
+        this.statusEffectNames.length === 1 &&
+        this.statusEffectNames[0].includes(';')
+      ) {
+        didMigrate = true;
+        await game.settings.set(
+          Constants.MODULE_ID,
+          Settings.STATUS_EFFECT_NAMES,
+          this.statusEffectNames[0].split(';')
+        );
+      }
+
+      if (didMigrate) {
+        ui.notifications.info(
+          'Migrated Convenient Effect settings. Please reload the game.'
+        );
+      }
+    }
   }
 
   get _defaultStatusEffectNames() {
@@ -175,7 +245,7 @@ export default class Settings {
       'Restrained',
       'Stunned',
       'Unconscious',
-    ].join(';');
+    ];
   }
 
   /**
@@ -185,7 +255,7 @@ export default class Settings {
    */
   get chatMessagePermission() {
     return parseInt(
-      game.settings.get(Settings.PACKAGE_NAME, Settings.CHAT_MESSAGE_PERMISSION)
+      game.settings.get(Constants.MODULE_ID, Settings.CHAT_MESSAGE_PERMISSION)
     );
   }
 
@@ -196,20 +266,17 @@ export default class Settings {
    */
   get controlsPermission() {
     return parseInt(
-      game.settings.get(Settings.PACKAGE_NAME, Settings.CONTROLS_PERMISSION)
+      game.settings.get(Constants.MODULE_ID, Settings.CONTROLS_PERMISSION)
     );
   }
 
   /**
-   * Returns the game setting for integrating with ATL
+   * Returns the game setting for integrating with ATE
    *
-   * @returns {boolean} true if integration with ATL is enabled
+   * @returns {boolean} true if integration with ATE is enabled
    */
-  get integrateWithAtl() {
-    return game.settings.get(
-      Settings.PACKAGE_NAME,
-      Settings.INTEGRATE_WITH_ATL
-    );
+  get integrateWithAte() {
+    return game.settings.get(Constants.MODULE_ID, Settings.INTEGRATE_WITH_ATE);
   }
 
   /**
@@ -219,7 +286,7 @@ export default class Settings {
    */
   get integrateWithTokenMagic() {
     return game.settings.get(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.INTEGRATE_WITH_TOKEN_MAGIC
     );
   }
@@ -231,7 +298,7 @@ export default class Settings {
    */
   get modifyStatusEffects() {
     return game.settings.get(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.MODIFY_STATUS_EFFECTS
     );
   }
@@ -242,10 +309,28 @@ export default class Settings {
    * @returns {boolean} true if targets should take first priority
    */
   get prioritizeTargets() {
+    return game.settings.get(Constants.MODULE_ID, Settings.PRIORITIZE_TARGETS);
+  }
+
+  /**
+   * Returns the game setting for the chat effect description
+   *
+   * @returns {string} a string representing the chosen chat effect description
+   */
+  get showChatMessageEffectDescription() {
     return game.settings.get(
-      Settings.PACKAGE_NAME,
-      Settings.PRIORITIZE_TARGETS
+      Constants.MODULE_ID,
+      Settings.SHOW_CHAT_MESSAGE_EFFECT_DESCRIPTION
     );
+  }
+
+  /**
+   * Returns the game setting for showing nested effects
+   *
+   * @returns {boolean} true if nested effects should be shown
+   */
+  get showNestedEffects() {
+    return game.settings.get(Constants.MODULE_ID, Settings.SHOW_NESTED_EFFECTS);
   }
 
   /**
@@ -254,10 +339,10 @@ export default class Settings {
    * @returns {String[]} the names of all the favorite effects
    */
   get favoriteEffectNames() {
-    return game.settings
-      .get(Settings.PACKAGE_NAME, Settings.FAVORITE_EFFECT_NAMES)
-      .split(';')
-      .filter((name) => name.trim());
+    return game.settings.get(
+      Constants.MODULE_ID,
+      Settings.FAVORITE_EFFECT_NAMES
+    );
   }
 
   /**
@@ -273,9 +358,9 @@ export default class Settings {
     favoriteEffectsArray = [...new Set(favoriteEffectsArray)]; // remove duplicates
 
     return game.settings.set(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.FAVORITE_EFFECT_NAMES,
-      favoriteEffectsArray.join(';')
+      favoriteEffectsArray
     );
   }
 
@@ -290,9 +375,9 @@ export default class Settings {
       (favoriteEffect) => favoriteEffect !== name
     );
     return game.settings.set(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.FAVORITE_EFFECT_NAMES,
-      favoriteEffectsArray.join(';')
+      favoriteEffectsArray
     );
   }
 
@@ -312,10 +397,7 @@ export default class Settings {
    * @returns {String[]} the names of all the status effects
    */
   get statusEffectNames() {
-    return game.settings
-      .get(Settings.PACKAGE_NAME, Settings.STATUS_EFFECT_NAMES)
-      .split(';')
-      .filter((name) => name.trim());
+    return game.settings.get(Constants.MODULE_ID, Settings.STATUS_EFFECT_NAMES);
   }
 
   /**
@@ -331,9 +413,9 @@ export default class Settings {
     statusEffectsArray = [...new Set(statusEffectsArray)]; // remove duplicates
 
     return game.settings.set(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.STATUS_EFFECT_NAMES,
-      statusEffectsArray.join(';')
+      statusEffectsArray
     );
   }
 
@@ -348,9 +430,9 @@ export default class Settings {
       (statusEffect) => statusEffect !== name
     );
     return game.settings.set(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.STATUS_EFFECT_NAMES,
-      statusEffectsArray.join(';')
+      statusEffectsArray
     );
   }
 
@@ -361,7 +443,7 @@ export default class Settings {
    */
   async resetStatusEffects() {
     return game.settings.set(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.STATUS_EFFECT_NAMES,
       this._defaultStatusEffectNames
     );
@@ -380,48 +462,45 @@ export default class Settings {
   /**
    * Returns the game setting for the saved expanded folder names
    *
-   * @returns {String[]} the names of all of the saved expanded folders
+   * @returns {String[]} the IDs of all of the saved expanded folders
    */
   get expandedFolders() {
-    return game.settings
-      .get(Settings.PACKAGE_NAME, Settings.EXPANDED_FOLDERS)
-      .split(';')
-      .filter((name) => name.trim());
+    return game.settings.get(Constants.MODULE_ID, Settings.EXPANDED_FOLDERS);
   }
 
   /**
-   * Adds a given folder name to the saved expanded folders
+   * Adds a given folder ID to the saved expanded folders
    *
-   * @param {string} name - the name of the folder to add to the saved expanded folders
+   * @param {string} id - the ID of the folder to add to the saved expanded folders
    * @returns {Promise} a promise that resolves when the settings update is complete
    */
-  async addExpandedFolder(name) {
+  async addExpandedFolder(id) {
     let expandedFolderArray = this.expandedFolders;
-    expandedFolderArray.push(name);
+    expandedFolderArray.push(id);
 
     expandedFolderArray = [...new Set(expandedFolderArray)]; // remove duplicates
 
     return game.settings.set(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.EXPANDED_FOLDERS,
-      expandedFolderArray.join(';')
+      expandedFolderArray
     );
   }
 
   /**
    * Removes a given folder name from the saved expanded folders
    *
-   * @param {string} name - the name of the folder to remove from the saved expanded folders
+   * @param {string} id - the ID of the folder to remove from the saved expanded folders
    * @returns {Promise} a promise that resolves when the settings update is complete
    */
-  async removeExpandedFolder(name) {
+  async removeExpandedFolder(id) {
     let expandedFolderArray = this.expandedFolders.filter(
-      (expandedFolder) => expandedFolder !== name
+      (expandedFolder) => expandedFolder !== id
     );
     return game.settings.set(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.EXPANDED_FOLDERS,
-      expandedFolderArray.join(';')
+      expandedFolderArray
     );
   }
 
@@ -432,20 +511,20 @@ export default class Settings {
    */
   async clearExpandedFolders() {
     return game.settings.set(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.EXPANDED_FOLDERS,
-      ''
+      []
     );
   }
 
   /**
    * Checks if the given folder name is expanded
    *
-   * @param {string} name - the folder name to search for
+   * @param {string} id - the folder ID to search for
    * @returns {boolean} true if the folder is in the saved expanded folders, false otherwise
    */
-  isFolderExpanded(name) {
-    return this.expandedFolders.includes(name);
+  isFolderExpanded(id) {
+    return this.expandedFolders.includes(id);
   }
 
   /**
@@ -455,7 +534,7 @@ export default class Settings {
    */
   get customEffectsItemId() {
     return game.settings.get(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.CUSTOM_EFFECTS_ITEM_ID
     );
   }
@@ -468,7 +547,7 @@ export default class Settings {
    */
   async setCustomEffectsItemId(id) {
     return game.settings.set(
-      Settings.PACKAGE_NAME,
+      Constants.MODULE_ID,
       Settings.CUSTOM_EFFECTS_ITEM_ID,
       id
     );

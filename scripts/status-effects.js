@@ -1,3 +1,4 @@
+import CustomEffectsHandler from './effects/custom-effects-handler.js';
 import Settings from './settings.js';
 
 /**
@@ -5,6 +6,7 @@ import Settings from './settings.js';
  */
 export default class StatusEffects {
   constructor() {
+    this._customEffectsHandler = new CustomEffectsHandler();
     this._settings = new Settings();
   }
 
@@ -15,8 +17,10 @@ export default class StatusEffects {
     const modifyStatusEffects = this._settings.modifyStatusEffects;
 
     if (modifyStatusEffects === 'replace') {
+      CONFIG.Combat.defeatedStatusId = 'Convenient Effect: Dead';
       CONFIG.statusEffects = this._fetchStatusEffects();
     } else if (modifyStatusEffects === 'add') {
+      CONFIG.Combat.defeatedStatusId = 'Convenient Effect: Dead';
       CONFIG.statusEffects = CONFIG.statusEffects.concat(
         this._fetchStatusEffects()
       );
@@ -25,9 +29,15 @@ export default class StatusEffects {
 
   _fetchStatusEffects() {
     return this._settings.statusEffectNames
-      .map((name) =>
-        game.dfreds.effects.all.find((effect) => effect.name == name)
-      )
+      .map((name) => {
+        const effect = this._customEffectsHandler
+          .getCustomEffects()
+          .find((effect) => effect.name == name);
+
+        if (effect) return effect;
+
+        return game.dfreds.effects.all.find((effect) => effect.name == name);
+      })
       .filter((effect) => effect)
       .map((effect) => effect.convertToActiveEffectData());
   }
@@ -48,7 +58,11 @@ export default class StatusEffects {
       event.preventDefault();
       event.stopPropagation();
       const effectName = statusEffectId.replace('Convenient Effect: ', '');
-      game.dfreds.effectInterface.toggleEffect(effectName, token.actor.uuid);
+
+      game.dfreds.effectInterface.toggleEffect(effectName, {
+        overlay: args.length > 1 && args[1]?.overlay,
+        uuids: [token.actor.uuid],
+      });
     } else {
       wrapper(...args);
     }
@@ -61,11 +75,16 @@ export default class StatusEffects {
    * the icon.
    *
    * @param {Token5e} token - the token to get the status effects for
+   * @param {fn} wrapper - the original getStatusEffectChoices function
+   * @param {any[]} args - any arguments provided with the original getStatusEffectChoices function
    * @returns {Object} object mapping for all the status effects
    */
-  getStatusEffectChoices(token) {
-    // NOTE: taken entirely from foundry.js, modified to remove the icon being the key
+  getStatusEffectChoices({ token, wrapper, args }) {
+    if (this._settings.modifyStatusEffects === 'none') {
+      return wrapper(...args);
+    }
 
+    // NOTE: taken entirely from foundry.js, modified to remove the icon being the key
     // Get statuses which are active for the token actor
     const actor = token.actor || null;
     const statuses = actor
@@ -85,13 +104,13 @@ export default class StatusEffects {
     const tokenEffects = foundry.utils.deepClone(token.data.effects) || [];
     if (token.data.overlayEffect) tokenEffects.push(token.data.overlayEffect);
     return CONFIG.statusEffects.concat(tokenEffects).reduce((obj, e) => {
+      const id = e.id; // NOTE: added this
+
       const src = e.icon ?? e;
-      if (src in obj) return obj;
+      if (id in obj) return obj; // NOTE: changed from src to id
       const status = statuses[e.id] || {};
       const isActive = !!status.id || token.data.effects.includes(src);
       const isOverlay = !!status.overlay || token.data.overlayEffect === src;
-
-      const id = e.id;
 
       // NOTE: changed key from src to id
       obj[id] = {
@@ -107,5 +126,27 @@ export default class StatusEffects {
       };
       return obj;
     }, {});
+  }
+
+  /**
+   * This function is called when the status effects are refreshed. It does
+   * essentially the same thing as the original method does, except that it
+   * bases the status on the token.dataset.statusId rather than the src
+   * attribute
+   *
+   * Refresh the currently active state of all status effect icons in the Token
+   * HUD selector.
+   *
+   * @param {TokenHUD} tokenHud - the token HUD application
+   */
+  refreshStatusIcons(tokenHud) {
+    const effects = tokenHud.element.find('.status-effects')[0];
+    const statuses = tokenHud._getStatusEffectChoices();
+    for (let img of effects.children) {
+      // NOTE: changed from img.getAttribute('src') to img.dataset.statusId
+      const status = statuses[img.dataset.statusId] || {};
+      img.classList.toggle('overlay', !!status.isOverlay);
+      img.classList.toggle('active', !!status.isActive);
+    }
   }
 }

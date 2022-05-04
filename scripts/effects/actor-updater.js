@@ -15,7 +15,7 @@ export default class ActorUpdater {
    * @param {string} uuid - the UUID of the actor to add the data changes to
    */
   async addActorDataChanges(effectName, uuid) {
-    const actor = await this._foundryHelpers.getActorByUuid(uuid);
+    const actor = this._foundryHelpers.getActorByUuid(uuid);
 
     switch (effectName.toLowerCase()) {
       case 'aid':
@@ -23,6 +23,9 @@ export default class ActorUpdater {
         break;
       case "bear's endurance":
         await this._addBearsEnduranceEffects(actor);
+        break;
+      case 'divine word':
+        await this._addDivineWordEffects(actor);
         break;
       case 'false life':
         await this._addFalseLifeEffects(actor);
@@ -49,6 +52,14 @@ export default class ActorUpdater {
     });
   }
 
+  async _addDivineWordEffects(actor) {
+    if (actor.data.data.attributes.hp.value <= 20) {
+      await actor.update({
+        'data.attributes.hp.value': 0,
+      });
+    }
+  }
+
   async _addFalseLifeEffects(actor) {
     const roll = new Roll('1d4 + 4');
     const evaluation = await roll.evaluate({ async: true });
@@ -67,11 +78,11 @@ export default class ActorUpdater {
         actor.data.data.attributes.hp.tempmax + evaluation.total,
       'data.attributes.hp.value':
         actor.data.data.attributes.hp.value + evaluation.total,
-      flags: foundry.utils.mergeObject(actor.data.flags, {
+      flags: {
         convenientEffects: {
           heroesFeastRoll: evaluation.total,
         },
-      }),
+      },
     });
   }
 
@@ -82,7 +93,7 @@ export default class ActorUpdater {
    * @param {string} uuid - the UUID of the actor to remove the data changes from
    */
   async removeActorDataChanges(effectName, uuid) {
-    const actor = await this._foundryHelpers.getActorByUuid(uuid);
+    const actor = this._foundryHelpers.getActorByUuid(uuid);
 
     switch (effectName.toLowerCase()) {
       case 'aid':

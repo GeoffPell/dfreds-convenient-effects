@@ -24,38 +24,43 @@ export default class ConvenientEffectsController {
   /**
    * Configures and returns the data that the app will send to the template
    *
-   * @returns the data to pass to the template
+   * @returns {Object} the data to pass to the template
    */
   get data() {
-    this._customEffectsHandler.initialize();
-
     return {
       folders: [
         {
+          id: 'favorites',
           label: 'Favorites',
           effects: this._fetchFavorites(),
         },
         {
+          id: 'custom',
           label: 'Custom',
           effects: this._fetchUnfavoritedCustomEffects(),
         },
         {
+          id: 'conditions',
           label: 'Conditions',
           effects: this._fetchUnfavoritedConditions(),
         },
         {
+          id: 'spells',
           label: 'Spells',
           effects: this._fetchUnfavoritedSpells(),
         },
         {
+          id: 'class-features',
           label: 'Class Features',
           effects: this._fetchUnfavoritedClassFeatures(),
         },
         {
+          id: 'equipment',
           label: 'Equipment',
           effects: this._fetchUnfavoritedEquipment(),
         },
         {
+          id: 'other',
           label: 'Other',
           effects: this._fetchUnfavoritedOther(),
         },
@@ -80,10 +85,9 @@ export default class ConvenientEffectsController {
   }
 
   _fetchUnfavoritedCustomEffects() {
-    const effects = game.dfreds.effects;
-    return effects.customEffects.filter(
-      (effect) => !this._settings.isFavoritedEffect(effect.name)
-    );
+    return this._customEffectsHandler
+      .getCustomEffects()
+      .filter((effect) => !this._settings.isFavoritedEffect(effect.name));
   }
 
   _fetchUnfavoritedConditions() {
@@ -130,8 +134,8 @@ export default class ConvenientEffectsController {
    * Remove the collapsed class from all saved, expanded folders
    */
   expandSavedFolders() {
-    this._settings.expandedFolders.forEach((folderName) => {
-      this._viewMvc.expandFolder(folderName);
+    this._settings.expandedFolders.forEach((folderId) => {
+      this._viewMvc.expandFolder(folderId);
     });
   }
 
@@ -151,9 +155,9 @@ export default class ConvenientEffectsController {
    */
   async onEditEffectClick(effectItem) {
     const effectName = effectItem.data().effectName;
-    const customEffect = game.dfreds.effects.customEffects.find(
-      (effect) => effect.name === effectName
-    );
+    const customEffect = this._customEffectsHandler
+      .getCustomEffects()
+      .find((effect) => effect.name == effectName);
 
     await this._customEffectsHandler.editCustomEffect(customEffect);
   }
@@ -165,12 +169,23 @@ export default class ConvenientEffectsController {
    */
   async onDeleteEffectClick(effectItem) {
     const effectName = effectItem.data().effectName;
-    const customEffect = game.dfreds.effects.customEffects.find(
-      (effect) => effect.name === effectName
-    );
+    const customEffect = this._customEffectsHandler
+      .getCustomEffects()
+      .find((effect) => effect.name == effectName);
 
     await this._customEffectsHandler.deleteCustomEffect(customEffect);
     this._viewMvc.render();
+  }
+
+  /**
+   * Checks if the provided effect is custom
+   *
+   * @param {jQuery} effectItem - jQuery element representing the effect list item
+   * @returns true if the effect is custom
+   */
+  isCustomEffect(effectItem) {
+    const effectName = effectItem.data().effectName;
+    return this._customEffectsHandler.isCustomEffect(effectName);
   }
 
   /**
@@ -193,7 +208,7 @@ export default class ConvenientEffectsController {
   /**
    * Handles clicks on the collapse all button
    *
-   * @param {MouseEvent} event
+   * @param {MouseEvent} event - event that corresponds to clicking the collapse all
    */
   async onCollapseAllClick(event) {
     this._viewMvc.collapseAllFolders();
@@ -206,18 +221,18 @@ export default class ConvenientEffectsController {
    * @param {MouseEvent} event - event that corresponds to clicking on the folder
    */
   async onFolderClick(event) {
-    let folderLabel = event.currentTarget.parentElement.dataset.folderLabel;
+    let folderId = event.currentTarget.parentElement.dataset.folderId;
 
-    if (this._viewMvc.isFolderCollapsed(folderLabel)) {
-      this._viewMvc.expandFolder(folderLabel);
+    if (this._viewMvc.isFolderCollapsed(folderId)) {
+      this._viewMvc.expandFolder(folderId);
     } else {
-      this._viewMvc.collapseFolder(folderLabel);
+      this._viewMvc.collapseFolder(folderId);
     }
 
-    if (this._settings.isFolderExpanded(folderLabel)) {
-      await this._settings.removeExpandedFolder(folderLabel);
+    if (this._settings.isFolderExpanded(folderId)) {
+      await this._settings.removeExpandedFolder(folderId);
     } else {
-      await this._settings.addExpandedFolder(folderLabel);
+      await this._settings.addExpandedFolder(folderId);
     }
   }
 
@@ -227,11 +242,14 @@ export default class ConvenientEffectsController {
    * @param {MouseEvent} event - event that corresponds to clicking an effect item
    */
   async onEffectClick(event) {
-    const effectName = event.target.innerText
-      ? event.target.innerText
-      : event.target.title;
-
+    const effectName = this._findNearestEffectName(event);
     await game.dfreds.effectInterface.toggleEffect(effectName);
+  }
+
+  _findNearestEffectName(event) {
+    return $(event.target)
+      .closest('[data-effect-name], .convenient-effect')
+      .data()?.effectName;
   }
 
   /**
@@ -262,6 +280,29 @@ export default class ConvenientEffectsController {
   }
 
   /**
+   * Checks if the provided effect is favorited
+   *
+   * @param {jQuery} effectItem - jQuery element representing the effect list item
+   * @returns true if the effect is favorited
+   */
+  isFavoritedEffect(effectItem) {
+    const effectName = effectItem.data().effectName;
+    return this._settings.isFavoritedEffect(effectName);
+  }
+
+  /**
+   * Handle toggling effects as overlays
+   *
+   * @param {jQuery} effectItem - jQuery element representing the effect list item
+   */
+  async onToggleOverlay(effectItem) {
+    const effectName = effectItem.data().effectName;
+    await game.dfreds.effectInterface.toggleEffect(effectName, {
+      overlay: true,
+    });
+  }
+
+  /**
    * Handle adding/removing the effect from the to/from the status effect settings
    *
    * @param {jQuery} effectItem - jQuery element representing the effect list item
@@ -280,57 +321,76 @@ export default class ConvenientEffectsController {
   }
 
   /**
+   * Handle duplicating an effect and adding as a custom effect
+   *
+   * @param {jQuery} effectItem - jQuery element representing the effect list item
+   */
+  async onDuplicateAsCustom(effectItem) {
+    const effectName = effectItem.data().effectName;
+
+    const effect = game.dfreds.effects.all.find(
+      (effect) => effect.name === effectName
+    );
+
+    await this._customEffectsHandler.duplicateExistingEffect(effect);
+
+    this._viewMvc.render();
+  }
+
+  /**
+   * Handle clicks on the export custom effects button
+   *
+   * @param {MouseEvent} event - event that corresponds to clicking the export
+   */
+  async onExportCustomEffectsClick(event) {
+    event.stopPropagation();
+    await this._customEffectsHandler.exportCustomEffectsToJson();
+  }
+
+  /**
+   * Handle clicks on the import custom effects button
+   *
+   * @param {MouseEvent} event - event that corresponds to clicking the export
+   */
+  async onImportCustomEffectsClick(event) {
+    event.stopPropagation();
+    await this._customEffectsHandler.importCustomEffectsFromJson();
+  }
+
+  /**
    * Handles starting the drag for effect items
+   * For non-nested effects, populates the dataTransfer with Foundry's expected
+   * ActiveEffect type and data to make non-nested effects behave as core does
    *
    * @param {DragEvent} event - event that corresponds to the drag start
    */
   onEffectDragStart(event) {
     const effectName = event.target.dataset.effectName;
-    event.dataTransfer.setData('text/plain', effectName);
-  }
 
-  /**
-   * Handles dragging an effect over a folder
-   *
-   * @param {DragEvent} event - event that corresponds to the drag over
-   */
-  onFolderDragOver(event) {
-    if (!this._isEventTargetFavorites(event)) return;
+    const effect = game.dfreds.effectInterface.findEffectByName(effectName);
 
-    event.preventDefault();
-    this._viewMvc.addDropTargetClassToFavorites();
-  }
-
-  /**
-   * Handles dragging an effect off of a folder
-   *
-   * @param {DragEvent} event - event that corresponds to the drag leave
-   */
-  onFolderDragLeave(event) {
-    if (!this._isEventTargetFavorites(event)) return;
-
-    event.preventDefault();
-    this._viewMvc.removeDropTargetClassFromFavorites();
-  }
-
-  /**
-   * Handles dropping an effect onto a folder
-   *
-   * @param {DragEvent} event - event that corresponds to the drop
-   */
-  async onDropOntoFolder(event) {
-    if (!this._isValidEffect(event) || !this._isEventTargetFavorites(event)) {
+    // special handling for nested effects
+    if (effect.nestedEffects.length) {
+      event.dataTransfer.setData(
+        'text/plain',
+        JSON.stringify({
+          effectName,
+        })
+      );
       return;
     }
 
-    const effectName = event.dataTransfer.getData('text/plain');
+    // otherwise use core default format
+    const effectData = effect.convertToActiveEffectData();
 
-    // Don't add favorites twice
-    if (!this._settings.isFavoritedEffect(effectName)) {
-      await this._settings.addFavoriteEffect(effectName);
-    }
-
-    this._viewMvc.render();
+    event.dataTransfer.setData(
+      'text/plain',
+      JSON.stringify({
+        effectName,
+        type: 'ActiveEffect',
+        data: effectData,
+      })
+    );
   }
 
   /**
@@ -360,7 +420,7 @@ export default class ConvenientEffectsController {
         el.style.display = !isSearch || match ? 'flex' : 'none';
       } else if (isFolder) {
         let match =
-          isSearch && matchingItems.folderLabels.has(el.dataset.folderLabel);
+          isSearch && matchingItems.folderIds.has(el.dataset.folderId);
         el.style.display = !isSearch || match ? 'flex' : 'none';
 
         // Expand folders with matches
@@ -368,7 +428,7 @@ export default class ConvenientEffectsController {
         else
           el.classList.toggle(
             'collapsed',
-            !this._settings.isFolderExpanded(el.dataset.folderLabel)
+            !this._settings.isFolderExpanded(el.dataset.folderId)
           );
       }
     }
@@ -376,30 +436,37 @@ export default class ConvenientEffectsController {
 
   _getMatchingItems(regex) {
     let effectNames = new Set();
-    let folderLabels = new Set();
+    let folderIds = new Set();
 
     for (let folder of this.data.folders) {
       for (let effect of folder.effects) {
         if (regex.test(SearchFilter.cleanQuery(effect.name))) {
           effectNames.add(effect.name);
-          folderLabels.add(folder.label);
+          folderIds.add(folder.id);
         }
       }
     }
 
     return {
       effectNames,
-      folderLabels,
+      folderIds,
     };
   }
 
   // Fixes bug when dragging over any item onto the convenient effects
   _isValidEffect(event) {
-    const effectName = event.dataTransfer.getData('text/plain');
-    return game.dfreds.effects.all.some((effect) => effect.name === effectName);
+    try {
+      const data = JSON.parse(event.dataTransfer.getData('text/plain'));
+      return game.dfreds.effects.all.some(
+        (effect) => effect.name === data.effectName
+      );
+    } catch (err) {
+      return false;
+    }
   }
 
+  // TODO delete
   _isEventTargetFavorites(event) {
-    return event.currentTarget.dataset.folderLabel === 'Favorites';
+    return event.currentTarget.dataset.folderId === 'favorites';
   }
 }
