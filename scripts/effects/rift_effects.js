@@ -674,90 +674,394 @@ get _System_shock(){
   }
   
   
-
-    // NOT DONE =============
+   /* Rifts Effects */
+   get _prone_till_next_turn(){
+    return new Effect({
+      name: 'prone_till_next_turn',
+      description:
+        'You fall Prone.',
+      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      turns: 1,
+      changes: [
+        {
+          key: 'flags.midi-qol.grants.advantage.attack.mwak',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.advantage.attack.msak',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.disadvantage.attack.rwak',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.disadvantage.attack.rsak',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.disadvantage.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'data.attributes.movement.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '*0.5',
+          priority: 5,
+        },
+      ],
+    });
+  }
 
 
   
+  
+   
+  get _PULLED_MUSCLE(){
+    var reduction = '1d6'
+    return new Effect({        
+      name: 'PULLED MUSCLE',
+      description:
+        'You are weakened until end of your next turn.',
+      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      turns: 1,
+      changes: [
+        {
+          key: 'data.bonuses.mwak.damage',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: reduction,
+        },
+        {
+          key: 'data.bonuses.rwak.damage',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: reduction,
+        },
+        {
+          key: 'data.bonuses.rsak.damage',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: reduction,
+        },        
+        {
+          key: 'data.bonuses.msak.damage',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: reduction,
+        },
+      ],
+    });
+  }
+
+
+  get _embarrassed(){
+    return new Effect({
+      name: 'Embarrassed',
+      description:
+        'You recieve a -2 penalty to attack rolls for 1d4 turns',
+      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      turns: '1d4',
+      changes: [
+        {
+          key: 'data.bonuses.msak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-2',
+        },
+        {
+          key: 'data.bonuses.mwak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-2',
+        },
+        {
+          key: 'data.bonuses.rsak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-2',
+        },
+        {
+          key: 'data.bonuses.rwak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-2',
+        },
+      ],
+    });
+  }
+
 
   
-  
-  
-
-  
-    /* Rifts Effects */
-    get _prone_till_next_turn(){
-      return new Effect({
-        name: 'prone_till_next_turn',
-        description:
-          'You fall Prone.',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        seconds: 20,
-        turns: '1d4',
-        changes: [
-          {
-            key: 'flags.midi-qol.disadvantage.attack.all',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
-          },
-        ],
-      });
-    }
-
-    get _PULLED_MUSCLE(){
-      return new Effect({
-        name: 'PULLED MUSCLE',
-        description:
-          'You are weakened until end of your next turn.',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        seconds: 20,
-        turns: '1d4',
-        changes: [
-          {
-            key: 'flags.midi-qol.disadvantage.attack.all',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
-          },
-        ],
-      });
-    }
-
-    get _embarrassed(){
-      return new Effect({
-        name: 'Embarrassed',
-        description:
-          'You recieve a -2 penalty to attack rolls for 1d4 turns',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        seconds: 20,
-        turns: '1d4',
-        changes: [
-          {
-            key: 'flags.midi-qol.disadvantage.attack.all',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
-          },
-        ],
-      });
-    }
-
     
   
-    get _OVEREXTENDED(){
+  get _OVEREXTENDED(){
+    return new Effect({
+      name: 'Stunned one turn',
+      description:
+        'The creature is stunned until the end of its next turn.',
+      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      turns: 1,
+      changes: [
+        {
+          key: 'flags.midi-qol.fail.ability.save.dex',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.fail.ability.save.str',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+        {
+          key: 'flags.midi-qol.grants.advantage.attack.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '1',
+        },
+      ],
+    });
+  }
+
+
+  get _fatigued(){
+    return new Effect({
+      name: 'Fatigued',
+      description:
+        'You are dazed until end of your next turn (You cannot cast spells)',
+      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+    });
+  }
+
+
+  
+
+  get _DISLOCATION(){
+    return new Effect({
+      name: 'DISLOCATION',
+      description:
+        'A forceful pop in your shoulder is is heard as your arm goes limp. -2 to attack rolls and dex, str checks/saves for 1d4 + 6 rounds',
+      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      turns: '1d4+6',
+      changes: [
+        {
+          key: 'data.abilities.dex.bonuses.check',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-2',
+        },
+        {
+          key: 'data.abilities.dex.bonuses.save',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-2',
+        },
+        {
+          key: 'data.abilities.str.bonuses.check',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-2',
+        },
+        {
+          key: 'data.abilities.str.bonuses.save',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-2',
+        },
+        {
+          key: 'data.bonuses.msak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 2,
+        },
+        {
+          key: 'data.bonuses.mwak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 2,
+        },
+        {
+          key: 'data.bonuses.rsak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 2,
+        },
+        {
+          key: 'data.bonuses.rwak.attack',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: 2,
+        },
+      ],
+    });
+  }
+  
+
+  
+  get _ANKLE_TWIST(){
+    return new Effect({
+      name: 'ANKLE TWIST',
+      description:
+        'You twist your ankle and have 1/2 movement speed and cannot charge for 1d4+1 rounds',
+      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      turns: '1d4+1',
+      changes: [
+        {
+          key: 'data.attributes.movement.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '*0.5',
+          priority: 5,
+        },
+      ],
+    });
+  }
+
+  get _KNEE_POP(){
+    return new Effect({
+      name: 'KNEE POP',
+      description:
+        'Your knee hyperextends awkwardly. You have 1/4 movement speed and cannot charge for 1d4 + 6 rounds',
+      icon: 'modules/dfreds-convenient-effects/images/prone.svg',
+      turns: '1d4+6',
+      changes: [
+        {
+          key: 'data.attributes.movement.all',
+          mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+          value: '*0.25',
+          priority: 5,
+        },
+      ],
+    });
+  }
+
+
+  
+  get _WRONG_STRAP(){
+    return new Effect({
+      name: 'WRONG STRAP',
+      description:
+        'In an embarrasing move, you cut loose part of your armor and receive a -4 penalty until armor is fixed. Fixing the armor will require 3 rounds of performing no other action',
+      icon: 'modules/dfreds-convenient-effects/images/broken-wall.svg',
+      changes: [
+        {
+          key: 'data.attributes.ac.bonus',
+          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+          value: '-4',
+        },
+      ],
+    });
+  }
+
+
+   
+
+
+
+    
+
+  
+    get _STAGGERING_IN_PAIN(){
       return new Effect({
-        name: 'Stunned one turn',
+        name: 'STAGGERING IN PAIN',
         description:
-          'The creature is stunned until the end of its next turn.',
+          'Your opponent parries your awkward attack that causes you to hit yourself in the groin. You have 1/2 movement and -4 to all actions for 1d6 + 4 rounds. If this action is impossible, your original target receives an action point',
         icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        seconds: 20,
-        turns: '1d4',
+        turns: '1d6+4',
         changes: [
           {
-            key: 'flags.midi-qol.fail.ability.save.dex',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
+            key: 'data.abilities.str.bonuses.save',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
           },
           {
-            key: 'flags.midi-qol.fail.ability.save.str',
+            key: 'data.abilities.str.bonuses.check',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
+          },
+
+          {
+            key: 'data.abilities.dex.bonuses.save',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
+          },
+          {
+            key: 'data.abilities.dex.bonuses.check',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
+          },
+
+          {
+            key: 'data.abilities.con.bonuses.save',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
+          },
+          {
+            key: 'data.abilities.con.bonuses.check',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
+          },
+
+          {
+            key: 'data.abilities.int.bonuses.save',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
+          },
+          {
+            key: 'data.abilities.int.bonuses.check',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
+          },
+
+          {
+            key: 'data.abilities.wis.bonuses.save',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
+          },
+          {
+            key: 'data.abilities.wis.bonuses.check',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
+          },
+
+          {
+            key: 'data.abilities.cha.bonuses.save',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
+          },
+          {
+            key: 'data.abilities.cha.bonuses.check',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '-4',
+          },
+
+          {
+            key: 'data.bonuses.msak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: -4,
+          },
+          {
+            key: 'data.bonuses.mwak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: -4,
+          },
+          {
+            key: 'data.bonuses.rsak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: -4,
+          },
+          {
+            key: 'data.bonuses.rwak.attack',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: -4,
+          },
+          {
+            key: 'data.attributes.movement.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '*0.5',
+            priority: 5,
+          },
+        ],
+      });
+    }
+  
+    get _BLINDED_BY_YOUR_OWN_BLOOD(){
+      return new Effect({
+        name: 'BLINDED BY YOUR OWN BLOOD',
+        description:
+          'You hit yourself in the head causing a minor flesh wound (4 damage) and you are blinded by blood flowing into your eyes for 1d4 rounds.',
+        turns: '1d4',
+        icon: 'modules/dfreds-convenient-effects/images/blinded.svg',
+        changes: [
+          {
+            key: 'flags.midi-qol.disadvantage.attack.all',
             mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
             value: '1',
           },
@@ -769,121 +1073,5 @@ get _System_shock(){
         ],
       });
     }
-    
-  
-    get _fatigued(){
-      return new Effect({
-        name: 'Fatigued',
-        description:
-          'You are dazed until end of your next turn',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        changes: [
-          {
-            key: 'flags.midi-qol.disadvantage.attack.all',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
-          },
-        ],
-      });
-    }
-
-
-    get _DISLOCATION(){
-      return new Effect({
-        name: 'DISLOCATION',
-        description:
-          'A forceful pop in your shoulder is is heard as your arm goes limp. The arm you used to make the attack is incapacitated for 1d4 + 6 rounds',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        changes: [
-          {
-            key: 'flags.midi-qol.disadvantage.attack.all',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
-          },
-        ],
-      });
-    }
-    
-  
-  
-    get _ANKLE_TWIST(){
-      return new Effect({
-        name: 'ANKLE TWIST',
-        description:
-          'You twist your ankle and have 1/2 movement speed and cannot charge for 1d4+1 rounds',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        changes: [
-          {
-            key: 'flags.midi-qol.disadvantage.attack.all',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
-          },
-        ],
-      });
-    }
-  
-    get _KNEE_POP(){
-      return new Effect({
-        name: 'KNEE POP',
-        description:
-          'Your knee hyperextends awkwardly. You have 1/4 movement speed and cannot charge for 1d4 + 6 rounds',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        changes: [
-          {
-            key: 'flags.midi-qol.disadvantage.attack.all',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
-          },
-        ],
-      });
-    }
-  
-    get _WRONG_STRAP(){
-      return new Effect({
-        name: 'WRONG STRAP',
-        description:
-          'In an embarrasing move, you cut loose part of your armor and receive a -4 penalty until armor is fixed. Fixing the armor will require 3 rounds of performing no other action',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        changes: [
-          {
-            key: 'flags.midi-qol.disadvantage.attack.all',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
-          },
-        ],
-      });
-    }
-  
-    get _STAGGERING_IN_PAIN(){
-      return new Effect({
-        name: 'STAGGERING IN PAIN',
-        description:
-          'Your opponent parries your awkward attack that causes you to hit yourself in the groin. You have 1/2 movement and -4 to all actions for 1d6 + 4 rounds. If this action is impossible, your original target receives an action point',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        changes: [
-          {
-            key: 'flags.midi-qol.disadvantage.attack.all',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
-          },
-        ],
-      });
-    }
-  
-    get _BLINDED_BY_YOUR_OWN_BLOOD(){
-      return new Effect({
-        name: 'BLINDED BY YOUR OWN BLOOD',
-        description:
-          'You hit yourself in the head causing a minor flesh wound (4 damage) and you are blinded by blood flowing into your eyes for 1d4 rounds.',
-        icon: 'modules/dfreds-convenient-effects/images/prone.svg',
-        changes: [
-          {
-            key: 'flags.midi-qol.disadvantage.attack.all',
-            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
-            value: '1',
-          },
-        ],
-      });
-    }
-  
+   // NOT DONE =============
 }
