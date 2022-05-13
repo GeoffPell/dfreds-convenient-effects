@@ -44,6 +44,9 @@ export default class RiftEffectDefinitions {
             this._BODY_BLOW,
             this._SHOULDER_BLOW,
 
+            //
+            this._Lasting_Poison,
+
         ]
     }
 
@@ -201,7 +204,7 @@ export default class RiftEffectDefinitions {
           key: 'flags.midi-qol.OverTime.regenerate',
           mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
           value:
-            'label=Bleeding,turn=start,damageRoll=-1d6,damageType=bleeding,condition=@attributes.hp.value > 0',
+            'label=Bleeding,turn=start,damageRoll=1d6,damageType=bleeding,condition=@attributes.hp.value > 0',
         },
       ],
     });
@@ -311,27 +314,27 @@ export default class RiftEffectDefinitions {
         {
           key: 'data.bonuses.abilities.check',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: '-1d2',
+          value: '-2',
         },
         {
           key: 'data.bonuses.msak.attack',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: '-1d2',
+          value: '-2',
         },
         {
           key: 'data.bonuses.mwak.attack',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: '-1d2',
+          value: '-2',
         },
         {
           key: 'data.bonuses.rsak.attack',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: '-1d2',
+          value: '-2',
         },
         {
           key: 'data.bonuses.rwak.attack',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: '-1d2',
+          value: '-2',
         },
       ],
     });
@@ -348,27 +351,27 @@ export default class RiftEffectDefinitions {
         {
           key: 'data.bonuses.abilities.check',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: '-1d4',
+          value: '-4',
         },
         {
           key: 'data.bonuses.msak.attack',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: '-1d4',
+          value: '-4',
         },
         {
           key: 'data.bonuses.mwak.attack',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: '-1d4',
+          value: '-4',
         },
         {
           key: 'data.bonuses.rsak.attack',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: '-1d4',
+          value: '-4',
         },
         {
           key: 'data.bonuses.rwak.attack',
           mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-          value: '-1d4',
+          value: '-4',
         },
       ],
     });
@@ -1069,6 +1072,34 @@ get _System_shock(){
             key: 'flags.midi-qol.grants.advantage.attack.all',
             mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
             value: '1',
+          },
+        ],
+      });
+    }
+
+
+    // -- other ---------
+    get _Lasting_Poison() {
+      return new Effect({
+        name: 'Lasting Poison',
+        description: 'Disadvantage on all attack rolls and ability checks',
+        icon: 'modules/dfreds-convenient-effects/images/poisoned.svg',
+        changes: [
+          {
+            key: 'flags.midi-qol.disadvantage.attack.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.disadvantage.ability.check.all',
+            mode: CONST.ACTIVE_EFFECT_MODES.CUSTOM,
+            value: '1',
+          },
+          {
+            key: 'flags.midi-qol.OverTime.regenerate',
+            mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+            value:
+              'label=Lasting Poison,turn=start,damageRoll=1d6,damageType=poison',
           },
         ],
       });
